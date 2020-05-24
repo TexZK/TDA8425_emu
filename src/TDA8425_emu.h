@@ -90,21 +90,20 @@ typedef enum TDA8425_Source {
 
 //! Source selectors as bit concatenation: ML1.ML0.IS
 typedef enum TDA8425_Selector {
-    TDA8425_Selector_Stereo_1 = 0,
-    TDA8425_Selector_Stereo_2,
-    TDA8425_Selector_Sound_A_1,
-    TDA8425_Selector_Sound_B_1,
-    TDA8425_Selector_Sound_A_2,
-    TDA8425_Selector_Sound_B_2,
-    TDA8425_Selector_Count
+    TDA8425_Selector_Sound_A_1 = 2,
+    TDA8425_Selector_Sound_A_2 = 3,
+    TDA8425_Selector_Sound_B_1 = 4,
+    TDA8425_Selector_Sound_B_2 = 5
+    TDA8425_Selector_Stereo_1  = 6,
+    TDA8425_Selector_Stereo_2  = 7,
 } TDA8425_Selector;
 
 //! Mode selectors as bit concatenation: STL.EFL
 typedef enum TDA8425_Mode {
-    TDA8425_Mode_SpatialStereo = 0,
+    TDA8425_Mode_ForcedMono = 0,
     TDA8425_Mode_LinearStereo,
     TDA8425_Mode_PseudoStereo,
-    TDA8425_Mode_ForcedMono,
+    TDA8425_Mode_SpatialStereo,
     TDA8425_Mode_Count
 } TDA8425_Mode;
 
@@ -130,6 +129,7 @@ enum TDA8425_DatasheetSpecifications {
 
     TDA8425_Tone_Data_Bits = 4,
     TDA8425_Tone_Data_Mask = (1 << TDA8425_Tone_Data_Bits) - 1,
+    TDA8425_Tone_Data_Unity = 6,
 
     TDA8425_Switch_Data_Bits = TDA8425_Reg_SF_Count,
     TDA8425_Switch_Data_Mask = (1 << TDA8425_Switch_Data_Bits) - 1,
@@ -140,7 +140,7 @@ enum TDA8425_DatasheetSpecifications {
     TDA8425_Pseudo_R1 = 13000,  // [ohm]
     TDA8425_Pseudo_R2 = 13000,  // [ohm]
 
-    TDA8425_Spatial_Crosstalk = 52,  // [%]
+    TDA8425_Spatial_Antiphase = 52,  // [%]
 };
 
 // ============================================================================
@@ -265,8 +265,6 @@ typedef struct TDA8425_ChipFloat
     TDA8245_Register reg_sf_;
 
     TDA8425_Float sample_rate_;
-    TDA8425_Selector selector_;
-    TDA8425_Mode mode_;
 
     TDA8425_Float volume_[TDA8425_Stereo_Count];
 
