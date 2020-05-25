@@ -560,7 +560,15 @@ void TDA8425_ChipFloat_Stop(TDA8425_ChipFloat* self)
 void TDA8425_ChipFloat_ProcessSample(
     TDA8425_ChipFloat* self,
     TDA8425_ChipFloat_Process_Data* data
-);
+)
+{
+    TDA8425_ChipFloat_ProcessVector(
+        self,
+        1,
+        data.inputs,
+        data.outputs
+    );
+}
 
 // ----------------------------------------------------------------------------
 
