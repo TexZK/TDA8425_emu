@@ -9,14 +9,14 @@
 
 
 #if __BYTE_ORDER == __LITTLE_ENDIAN
-    #define READ_LE (dst_, size_)  (fread ((dst_), (size_), 1, stdin ) == (size_))
+    #define READ_LE( dst_, size_)  (fread ((dst_), (size_), 1, stdin ) == (size_))
     #define WRITE_LE(src_, size_)  (fwrite((src_), (size_), 1, stdout) == (size_))
-    #define READ_BE (dst_, size_)  (fread ((dst_), 1, (size_), stdin ) == (size_))
+    #define READ_BE( dst_, size_)  (fread ((dst_), 1, (size_), stdin ) == (size_))
     #define WRITE_BE(src_, size_)  (fwrite((src_), 1, (size_), stdout) == (size_))
 #elif __BYTE_ORDER == __BIG_ENDIAN
-    #define READ_LE (dst_, size_)  (fread ((dst_), 1, (size_), stdin ) == (size_))
+    #define READ_LE( dst_, size_)  (fread ((dst_), 1, (size_), stdin ) == (size_))
     #define WRITE_LE(src_, size_)  (fwrite((src_), 1, (size_), stdout) == (size_))
-    #define READ_BE (dst_, size_)  (fread ((dst_), (size_), 1, stdin ) == (size_))
+    #define READ_BE( dst_, size_)  (fread ((dst_), (size_), 1, stdin ) == (size_))
     #define WRITE_BE(src_, size_)  (fwrite((src_), (size_), 1, stdout) == (size_))
 #else
     #error "Unsupported __BYTE_ORDER"
@@ -161,7 +161,7 @@ int ReadS64B(TDA8425_Float* dst) {
 }
 
 int ReadF32L(TDA8425_Float* dst) {
-    float32_t src;
+    float src;
     if (READ_LE(&src, sizeof(src))) {
         *dst = (TDA8425_Float)src;
         return 1;
@@ -170,7 +170,7 @@ int ReadF32L(TDA8425_Float* dst) {
 }
 
 int ReadF32B(TDA8425_Float* dst) {
-    float32_t src;
+    float src;
     if (READ_BE(&src, sizeof(src))) {
         *dst = (TDA8425_Float)src;
         return 1;
@@ -179,7 +179,7 @@ int ReadF32B(TDA8425_Float* dst) {
 }
 
 int ReadF64L(TDA8425_Float* dst) {
-    float64_t src;
+    double src;
     if (READ_LE(&src, sizeof(src))) {
         *dst = (TDA8425_Float)src;
         return 1;
@@ -188,7 +188,7 @@ int ReadF64L(TDA8425_Float* dst) {
 }
 
 int ReadF64B(TDA8425_Float* dst) {
-    float64_t src;
+    double src;
     if (READ_BE(&src, sizeof(src))) {
         *dst = (TDA8425_Float)src;
         return 1;
@@ -197,100 +197,100 @@ int ReadF64B(TDA8425_Float* dst) {
 }
 
 
-TDA8425_Float const* WriteU8(TDA8425_Float src) {
+int WriteU8(TDA8425_Float src) {
     int8_t dst = (int8_t)(src * -(TDA8425_Float)INT8_MIN);
     return WRITE_LE(&dst, sizeof(dst));
 }
 
-TDA8425_Float const* WriteS8(TDA8425_Float src) {
+int WriteS8(TDA8425_Float src) {
     int8_t dst = (int8_t)(src * -(TDA8425_Float)INT8_MIN);
     dst -= INT8_MIN;
     return WRITE_LE(&dst, sizeof(dst));
 }
 
-TDA8425_Float const* WriteU16L(TDA8425_Float src) {
+int WriteU16L(TDA8425_Float src) {
     int16_t dst = (int16_t)(src * -(TDA8425_Float)INT16_MIN);
     dst -= INT16_MIN;
     return WRITE_LE(&dst, sizeof(dst));
 }
 
-TDA8425_Float const* WriteU16B(TDA8425_Float src) {
+int WriteU16B(TDA8425_Float src) {
     int16_t dst = (int16_t)(src * -(TDA8425_Float)INT16_MIN);
     dst -= INT16_MIN;
     return WRITE_BE(&dst, sizeof(dst));
 }
 
-TDA8425_Float const* WriteS16L(TDA8425_Float src) {
+int WriteS16L(TDA8425_Float src) {
     int16_t dst = (int16_t)(src * -(TDA8425_Float)INT16_MIN);
     return WRITE_LE(&dst, sizeof(dst));
 }
 
-TDA8425_Float const* WriteS16B(TDA8425_Float src) {
+int WriteS16B(TDA8425_Float src) {
     int16_t dst = (int16_t)(src * -(TDA8425_Float)INT16_MIN);
     return WRITE_BE(&dst, sizeof(dst));
 }
 
-TDA8425_Float const* WriteU32L(TDA8425_Float src) {
+int WriteU32L(TDA8425_Float src) {
     int32_t dst = (int32_t)(src * -(TDA8425_Float)INT32_MIN);
     dst -= INT32_MIN;
     return WRITE_LE(&dst, sizeof(dst));
 }
 
-TDA8425_Float const* WriteU32B(TDA8425_Float src) {
+int WriteU32B(TDA8425_Float src) {
     int32_t dst = (int32_t)(src * -(TDA8425_Float)INT32_MIN);
     dst -= INT32_MIN;
     return WRITE_BE(&dst, sizeof(dst));
 }
 
-TDA8425_Float const* WriteS32L(TDA8425_Float src) {
+int WriteS32L(TDA8425_Float src) {
     int32_t dst = (int32_t)(src * -(TDA8425_Float)INT32_MIN);
     return WRITE_LE(&dst, sizeof(dst));
 }
 
-TDA8425_Float const* WriteS32B(TDA8425_Float src) {
+int WriteS32B(TDA8425_Float src) {
     int32_t dst = (int32_t)(src * -(TDA8425_Float)INT32_MIN);
     return WRITE_BE(&dst, sizeof(dst));
 }
 
-TDA8425_Float const* WriteU64L(TDA8425_Float src) {
+int WriteU64L(TDA8425_Float src) {
     int64_t dst = (int64_t)(src * -(TDA8425_Float)INT64_MIN);
     dst -= INT64_MIN;
     return WRITE_LE(&dst, sizeof(dst));
 }
 
-TDA8425_Float const* WriteU64B(TDA8425_Float src) {
+int WriteU64B(TDA8425_Float src) {
     int64_t dst = (int64_t)(src * -(TDA8425_Float)INT64_MIN);
     dst -= INT64_MIN;
     return WRITE_BE(&dst, sizeof(dst));
 }
 
-TDA8425_Float const* WriteS64L(TDA8425_Float src) {
+int WriteS64L(TDA8425_Float src) {
     int64_t dst = (int64_t)(src * -(TDA8425_Float)INT64_MIN);
     return WRITE_LE(&dst, sizeof(dst));
 }
 
-TDA8425_Float const* WriteS64B(TDA8425_Float src) {
+int WriteS64B(TDA8425_Float src) {
     int64_t dst = (int64_t)(src * -(TDA8425_Float)INT64_MIN);
     return WRITE_BE(&dst, sizeof(dst));
 }
 
-TDA8425_Float const* WriteF32L(TDA8425_Float src) {
-    float32_t dst = (float32_t)src;
+int WriteF32L(TDA8425_Float src) {
+    float dst = (float)src;
     return WRITE_LE(&dst, sizeof(dst));
 }
 
-TDA8425_Float const* WriteF32B(TDA8425_Float src) {
-    float32_t dst = (float32_t)src;
+int WriteF32B(TDA8425_Float src) {
+    float dst = (float)src;
     return WRITE_BE(&dst, sizeof(dst));
 }
 
-TDA8425_Float const* WriteF64L(TDA8425_Float src) {
-    float64_t dst = (float64_t)src;
+int WriteF64L(TDA8425_Float src) {
+    double dst = (double)src;
     return WRITE_LE(&dst, sizeof(dst));
 }
 
-TDA8425_Float const* WriteF64B(TDA8425_Float src) {
-    float64_t dst = (float64_t)src;
+int WriteF64B(TDA8425_Float src) {
+    double dst = (double)src;
     return WRITE_BE(&dst, sizeof(dst));
 }
 
@@ -449,8 +449,9 @@ int main(int argc, char const* argv[])
         TDA8425_ChipFloat_Process_Data data;
         long channel;
 
+        TDA8425_Float* inputs = &data.inputs[0][0];  // overflows
         for (channel = 0; channel < channels; ++channel) {
-            if (!stream_reader(&data.inputs[0][channel])) {  // allow overflow
+            if (!stream_reader(&inputs[channel])) {
                 if (ferror(stdin)) {
                     perror("stream_reader()");
                     goto on_error_;
@@ -461,10 +462,10 @@ int main(int argc, char const* argv[])
             }
         }
         for (; channel < MAX_INPUTS; ++channel) {
-            data.inputs[0][channel] = 0;  // allow overflow
+            inputs[channel] = 0;
         }
 
-        TDA8425_ChipFloat_ProcessSample(&chip, &data);
+        TDA8425_ChipFloat_Process(&chip, &data);
 
         for (channel = 0; channel < MAX_OUTPUTS; ++channel) {
             if (!stream_writer(data.outputs[channel])) {

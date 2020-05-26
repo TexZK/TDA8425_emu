@@ -50,9 +50,10 @@ extern "C" {
 
 // ============================================================================
 
-typedef uint8_t  TDA8425_Address;   //!< Address data type
-typedef uint8_t  TDA8425_Register;  //!< Register data type
-typedef size_t   TDA8425_Index;     //!< Sample index data type
+typedef uint8_t       TDA8425_Address;   //!< Address data type
+typedef uint8_t       TDA8425_Register;  //!< Register data type
+typedef size_t        TDA8425_Index;     //!< Sample index data type
+typedef TDA8425_FLOAT TDA8425_Float;     //!< Floating point data type
 
 //! Registers enumerator
 typedef enum TDA8425_Reg {
@@ -65,27 +66,27 @@ typedef enum TDA8425_Reg {
 
 //! Switch functions bit identifiers
 typedef enum TDA8425_Reg_SF_Bit {
-    TDA8425_Reg_SF_IS = 0,
-    TDA8425_Reg_SF_ML0,
-    TDA8425_Reg_SF_ML1,
-    TDA8425_Reg_SF_STL,
-    TDA8425_Reg_SF_EFL,
-    TDA8425_Reg_SF_MU,
-    TDA8425_Reg_SF_Count
+    TDA8425_Reg_SF_IS    = 0,
+    TDA8425_Reg_SF_ML0   = 1,
+    TDA8425_Reg_SF_ML1   = 2,
+    TDA8425_Reg_SF_STL   = 3,
+    TDA8425_Reg_SF_EFL   = 4,
+    TDA8425_Reg_SF_MU    = 5,
+    TDA8425_Reg_SF_Count = 6
 } TDA8425_Reg_SF_Bit;
 
 //! Stereo channels
 typedef enum TDA8425_Stereo {
-    TDA8425_Stereo_L = 0,
-    TDA8425_Stereo_R,
-    TDA8425_Stereo_Count
+    TDA8425_Stereo_L     = 0,
+    TDA8425_Stereo_R     = 1,
+    TDA8425_Stereo_Count = 2
 } TDA8425_Stereo;
 
 //! Source channels
 typedef enum TDA8425_Source {
-    TDA8425_Source_1 = 0,
-    TDA8425_Source_2,
-    TDA8425_Source_Count
+    TDA8425_Source_1     = 0,
+    TDA8425_Source_2     = 1,
+    TDA8425_Source_Count = 2
 } TDA8425_Source;
 
 //! Source selectors as bit concatenation: ML1.ML0.IS
@@ -93,52 +94,54 @@ typedef enum TDA8425_Selector {
     TDA8425_Selector_Sound_A_1 = 2,
     TDA8425_Selector_Sound_A_2 = 3,
     TDA8425_Selector_Sound_B_1 = 4,
-    TDA8425_Selector_Sound_B_2 = 5
+    TDA8425_Selector_Sound_B_2 = 5,
     TDA8425_Selector_Stereo_1  = 6,
-    TDA8425_Selector_Stereo_2  = 7,
+    TDA8425_Selector_Stereo_2  = 7
 } TDA8425_Selector;
 
 //! Mode selectors as bit concatenation: STL.EFL
 typedef enum TDA8425_Mode {
-    TDA8425_Mode_ForcedMono = 0,
-    TDA8425_Mode_LinearStereo,
-    TDA8425_Mode_PseudoStereo,
-    TDA8425_Mode_SpatialStereo,
-    TDA8425_Mode_Count
+    TDA8425_Mode_ForcedMono    = 0,
+    TDA8425_Mode_LinearStereo  = 1,
+    TDA8425_Mode_PseudoStereo  = 2,
+    TDA8425_Mode_SpatialStereo = 3,
+    TDA8425_Mode_Count         = 4
 } TDA8425_Mode;
 
 //! Auto-mute mode
 typedef enum TDA8425_AutoMute {
-    TDA8425_AutoMute_AfterPOR = 0,
-    TDA8425_AutoMute_NotActive,
-    TDA8425_AutoMute_Count
+    TDA8425_AutoMute_AfterPOR  = 0,
+    TDA8425_AutoMute_NotActive = 1,
+    TDA8425_AutoMute_Count     = 2
 } TDA8425_AutoMute;
 
 //! Pseudo-stereo presets
 typedef enum TDA8425_Pseudo_Preset {
-    TDA8425_Pseudo_Preset_1 = 0,
-    TDA8425_Pseudo_Preset_2,
-    TDA8425_Pseudo_Preset_3,
-    TDA8425_Pseudo_Preset_Count
+    TDA8425_Pseudo_Preset_1     = 0,
+    TDA8425_Pseudo_Preset_2     = 1,
+    TDA8425_Pseudo_Preset_3     = 2,
+    TDA8425_Pseudo_Preset_Count = 3
 } TDA8425_Pseudo_Preset;
 
 //! Datasheet specifications
 enum TDA8425_DatasheetSpecifications {
-    TDA8425_Volume_Data_Bits = 6,
-    TDA8425_Volume_Data_Mask = (1 << TDA8425_Volume_Data_Bits) - 1,
+    TDA8425_Volume_Data_Bits  = 6,
+    TDA8425_Volume_Data_Count = 1 << TDA8425_Volume_Data_Bits,
+    TDA8425_Volume_Data_Mask  = TDA8425_Volume_Data_Count - 1,
 
-    TDA8425_Tone_Data_Bits = 4,
-    TDA8425_Tone_Data_Mask = (1 << TDA8425_Tone_Data_Bits) - 1,
-    TDA8425_Tone_Data_Unity = 6,
+    TDA8425_Tone_Data_Bits    = 4,
+    TDA8425_Tone_Data_Count   = 1 << TDA8425_Tone_Data_Bits,
+    TDA8425_Tone_Data_Mask    = TDA8425_Tone_Data_Count - 1,
+    TDA8425_Tone_Data_Unity   = 6,
 
-    TDA8425_Switch_Data_Bits = TDA8425_Reg_SF_Count,
-    TDA8425_Switch_Data_Mask = (1 << TDA8425_Switch_Data_Bits) - 1,
+    TDA8425_Switch_Data_Bits  = TDA8425_Reg_SF_Count,
+    TDA8425_Switch_Data_Mask  = (1 << TDA8425_Switch_Data_Bits) - 1,
 
-    TDA8425_Bass_Frequency   =  300,  // [Hz]
-    TDA8425_Treble_Frequency = 3600,  // [Hz]
+    TDA8425_Bass_Frequency    =  300,  // [Hz]
+    TDA8425_Treble_Frequency  = 3600,  // [Hz]
 
-    TDA8425_Pseudo_R1 = 13000,  // [ohm]
-    TDA8425_Pseudo_R2 = 13000,  // [ohm]
+    TDA8425_Pseudo_R1         = 13000,  // [ohm]
+    TDA8425_Pseudo_R2         = 13000,  // [ohm]
 
     TDA8425_Spatial_Antiphase = 52,  // [%]
 };
@@ -163,7 +166,7 @@ TDA8425_INLINE
 TDA8425_Float TDA8425_RegisterToVolume(TDA8425_Register data)
 {
     TDA8425_Register index = data & (TDA8425_Register)TDA8425_Volume_Data_Mask;
-    TDA8425_Float volume_gain = TDA8425_VolumeLinear_Table[index]
+    TDA8425_Float volume_gain = TDA8425_VolumeLinear_Table[index];
     return volume_gain;
 }
 
@@ -173,7 +176,7 @@ TDA8425_INLINE
 TDA8425_Float TDA8425_RegisterToBass(TDA8425_Register data)
 {
     TDA8425_Register index = data & (TDA8425_Register)TDA8425_Tone_Data_Mask;
-    TDA8425_Float bass_gain = TDA8425_BassLinear_Table[index]
+    TDA8425_Float bass_gain = TDA8425_BassLinear_Table[index];
     return bass_gain;
 }
 
@@ -183,7 +186,7 @@ TDA8425_INLINE
 TDA8425_Float TDA8425_RegisterToTreble(TDA8425_Register data)
 {
     TDA8425_Register index = data & (TDA8425_Register)TDA8425_Tone_Data_Mask;
-    TDA8425_Float treble_gain = TDA8425_TrebleLinear_Table[index]
+    TDA8425_Float treble_gain = TDA8425_TrebleLinear_Table[index];
     return treble_gain;
 }
 
@@ -251,21 +254,22 @@ void TDA8425_BiQuadFloat_ProcessVector(
     TDA8425_BiQuadStateFloat* state,
     TDA8425_Index count,
     TDA8425_Float const inputs[],
-    TDA8425_Float outputs[],
+    TDA8425_Float outputs[]
 );
 
 // ============================================================================
 
 typedef struct TDA8425_ChipFloat
 {
-    TDA8245_Register reg_vl_;
-    TDA8245_Register reg_vr_;
-    TDA8245_Register reg_ba_;
-    TDA8245_Register reg_tr_;
-    TDA8245_Register reg_sf_;
+    TDA8425_Register reg_vl_;
+    TDA8425_Register reg_vr_;
+    TDA8425_Register reg_ba_;
+    TDA8425_Register reg_tr_;
+    TDA8425_Register reg_sf_;
 
     TDA8425_Float sample_rate_;
-
+    TDA8425_Selector selector_;
+    TDA8425_Mode mode_;
     TDA8425_Float volume_[TDA8425_Stereo_Count];
 
     TDA8425_BiQuadModelFloat pseudo_model_;
@@ -304,16 +308,9 @@ void TDA8425_ChipFloat_Start(TDA8425_ChipFloat* self);
 
 void TDA8425_ChipFloat_Stop(TDA8425_ChipFloat* self);
 
-void TDA8425_ChipFloat_ProcessSample(
+void TDA8425_ChipFloat_Process(
     TDA8425_ChipFloat* self,
     TDA8425_ChipFloat_Process_Data* data
-);
-
-void TDA8425_ChipFloat_ProcessVector(
-    TDA8425_ChipFloat* self,
-    TDA8425_Index count,
-    TDA8425_Float const **inputs,
-    TDA8425_Float **outputs
 );
 
 TDA8425_Register TDA8425_ChipFloat_Read(
