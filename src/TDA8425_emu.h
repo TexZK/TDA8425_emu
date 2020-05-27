@@ -128,6 +128,7 @@ enum TDA8425_DatasheetSpecifications {
     TDA8425_Volume_Data_Bits  = 6,
     TDA8425_Volume_Data_Count = 1 << TDA8425_Volume_Data_Bits,
     TDA8425_Volume_Data_Mask  = TDA8425_Volume_Data_Count - 1,
+    TDA8425_Volume_Data_Unity = 60,
 
     TDA8425_Tone_Data_Bits    = 4,
     TDA8425_Tone_Data_Count   = 1 << TDA8425_Tone_Data_Bits,

@@ -321,7 +321,7 @@ void TDA8425_BiQuadModelFloat_SetupBass(
 {
     double fs = sample_rate;
     double w = (2 * M_PI) * (double)TDA8425_Bass_Frequency;
-    double s = .5;
+    double s = 1;
     double g = sqrt(bass_gain);
 
     double p = w / fs;
@@ -364,7 +364,7 @@ void TDA8425_BiQuadModelFloat_SetupTreble(
 {
     double fs = sample_rate;
     double w = (2 * M_PI) * (double)TDA8425_Treble_Frequency;
-    double s = .5;
+    double s = 1;
     double g = sqrt(treble_gain);
 
     double p = w / fs;
@@ -613,6 +613,7 @@ void TDA8425_ChipFloat_Process(
         break;
     }
     case TDA8425_Mode_PseudoStereo: {
+        stereo[TDA8425_Stereo_R] = stereo[TDA8425_Stereo_L];
         stereo[TDA8425_Stereo_L] = TDA8425_BiQuadFloat_ProcessSample(
             &self->pseudo_model_,
             &self->pseudo_state_,
@@ -627,7 +628,7 @@ void TDA8425_ChipFloat_Process(
         TDA8425_Float l2 = l1 - c1;
         TDA8425_Float r2 = r1 - c1;
         TDA8425_Float k = ((TDA8425_Float)TDA8425_Spatial_Antiphase / 100);
-        TDA8425_Float c2 = c1 * k;
+        TDA8425_Float c2 = c1 * (1 - (1 - k) / 2);
         TDA8425_Float l3 = l2 + c2;
         TDA8425_Float r3 = r2 + c2;
         stereo[TDA8425_Stereo_L] = l3;
@@ -720,7 +721,7 @@ void TDA8425_ChipFloat_Write(
         data |= (TDA8425_Register)~TDA8425_Tone_Data_Mask;
         self->reg_ba_ = data;
 
-        TDA8425_Register index = data & TDA8425_Volume_Data_Mask;
+        TDA8425_Register index = data & TDA8425_Tone_Data_Mask;
         TDA8425_Float gain = TDA8425_BassLinear_Table[index];
 
         TDA8425_BiQuadModelFloat_SetupBass(
@@ -734,7 +735,7 @@ void TDA8425_ChipFloat_Write(
         data |= (TDA8425_Register)~TDA8425_Tone_Data_Mask;
         self->reg_tr_ = data;
 
-        TDA8425_Register index = data & TDA8425_Volume_Data_Mask;
+        TDA8425_Register index = data & TDA8425_Tone_Data_Mask;
         TDA8425_Float gain = TDA8425_TrebleLinear_Table[index];
 
         TDA8425_BiQuadModelFloat_SetupTreble(

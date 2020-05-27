@@ -1,6 +1,8 @@
 #include "TDA8425_emu.h"
 
 #include <errno.h>
+#include <fcntl.h>
+#include <io.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -9,15 +11,15 @@
 
 
 #if __BYTE_ORDER == __LITTLE_ENDIAN
-    #define READ_LE( dst_, size_)  (fread ((dst_), (size_), 1, stdin ) == (size_))
-    #define WRITE_LE(src_, size_)  (fwrite((src_), (size_), 1, stdout) == (size_))
+    #define READ_LE( dst_, size_)  (fread ((dst_), (size_), 1, stdin ) == 1)
+    #define WRITE_LE(src_, size_)  (fwrite((src_), (size_), 1, stdout) == 1)
     #define READ_BE( dst_, size_)  (fread ((dst_), 1, (size_), stdin ) == (size_))
     #define WRITE_BE(src_, size_)  (fwrite((src_), 1, (size_), stdout) == (size_))
 #elif __BYTE_ORDER == __BIG_ENDIAN
     #define READ_LE( dst_, size_)  (fread ((dst_), 1, (size_), stdin ) == (size_))
     #define WRITE_LE(src_, size_)  (fwrite((src_), 1, (size_), stdout) == (size_))
-    #define READ_BE( dst_, size_)  (fread ((dst_), (size_), 1, stdin ) == (size_))
-    #define WRITE_BE(src_, size_)  (fwrite((src_), (size_), 1, stdout) == (size_))
+    #define READ_BE( dst_, size_)  (fread ((dst_), (size_), 1, stdin ) == 1)
+    #define WRITE_BE(src_, size_)  (fwrite((src_), (size_), 1, stdout) == 1)
 #else
     #error "Unsupported __BYTE_ORDER"
 #endif
@@ -337,17 +339,17 @@ int main(int argc, char const* argv[])
     TDA8425_Float rate = 44100;
     TDA8425_Float pseudo_c1 = TDA8425_Pseudo_C1_Table[0];
     TDA8425_Float pseudo_c2 = TDA8425_Pseudo_C2_Table[0];
-    TDA8425_Register reg_vl = (TDA8425_Register)TDA8425_Volume_Data_Mask;
-    TDA8425_Register reg_vr = (TDA8425_Register)TDA8425_Volume_Data_Mask;
+    TDA8425_Register reg_vl = (TDA8425_Register)TDA8425_Volume_Data_Unity;
+    TDA8425_Register reg_vr = (TDA8425_Register)TDA8425_Volume_Data_Unity;
     TDA8425_Register reg_ba = (TDA8425_Register)TDA8425_Tone_Data_Unity;
     TDA8425_Register reg_tr = (TDA8425_Register)TDA8425_Tone_Data_Unity;
-    TDA8425_Register reg_sf = (TDA8425_Register)(
-        TDA8425_Selector_Stereo_1 |
-        (TDA8425_Mode_LinearStereo << TDA8425_Reg_SF_STL)
+    TDA8425_Register reg_sf = (
+        (TDA8425_Register)TDA8425_Selector_Stereo_1 |
+        ((TDA8425_Register)TDA8425_Mode_SpatialStereo << TDA8425_Reg_SF_STL)
     );
 
     for (int i = 1; i < argc; ++i) {
-        // unary arguments
+        // Unary arguments
         if (!strcmp(argv[i], "-h") ||
             !strcmp(argv[i], "--help")) {
             fprintf(stderr, USAGE);
@@ -439,10 +441,27 @@ int main(int argc, char const* argv[])
         }
     }
 
+    _setmode(_fileno(stdin), O_BINARY);
+    if (errno) {
+        perror("_setmode(stdin)");
+        return 1;
+    }
+
+    _setmode(_fileno(stdout), O_BINARY);
+    if (errno) {
+        perror("_setmode(stdout)");
+        return 1;
+    }
+
     TDA8425_ChipFloat chip;
     TDA8425_ChipFloat_Ctor(&chip);
     TDA8425_ChipFloat_Setup(&chip, rate, pseudo_c1, pseudo_c2);
     TDA8425_ChipFloat_Reset(&chip);
+    TDA8425_ChipFloat_Write(&chip, TDA8425_Reg_VL, reg_vl);
+    TDA8425_ChipFloat_Write(&chip, TDA8425_Reg_VR, reg_vr);
+    TDA8425_ChipFloat_Write(&chip, TDA8425_Reg_BA, reg_ba);
+    TDA8425_ChipFloat_Write(&chip, TDA8425_Reg_TR, reg_tr);
+    TDA8425_ChipFloat_Write(&chip, TDA8425_Reg_SF, reg_sf);
     TDA8425_ChipFloat_Start(&chip);
 
     while (!feof(stdin)) {
