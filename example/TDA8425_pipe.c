@@ -413,72 +413,93 @@ int ReadF64B(TDA8425_Float* dst) {
 
 
 int WriteU8(TDA8425_Float src) {
-    int8_t dst = (int8_t)fmin(fmax(src * -(double)INT8_MIN, INT8_MIN), INT8_MAX) - INT8_MIN;
+    double scaled = src * -(double)INT8_MIN;
+    int8_t dst = (int8_t)fmin(fmax(scaled, INT8_MIN), INT8_MAX);
+    dst -= INT8_MIN;
     return WRITE_LE(&dst, sizeof(dst));
 }
 
 int WriteS8(TDA8425_Float src) {
-    int8_t dst = (int8_t)fmin(fmax(src * -(double)INT8_MIN, INT8_MIN), INT8_MAX);
+    double scaled = src * -(double)INT8_MIN;
+    int8_t dst = (int8_t)fmin(fmax(scaled, INT8_MIN), INT8_MAX);
     return WRITE_LE(&dst, sizeof(dst));
 }
 
 int WriteU16L(TDA8425_Float src) {
-    int16_t dst = (int16_t)fmin(fmax(src * -(double)INT16_MIN, INT16_MIN), INT16_MAX) - INT16_MIN;
+    double scaled = src * -(double)INT16_MIN;
+    int16_t dst = (int16_t)fmin(fmax(scaled, INT16_MIN), INT16_MAX);
+    dst -= INT16_MIN;
     return WRITE_LE(&dst, sizeof(dst));
 }
 
 int WriteU16B(TDA8425_Float src) {
-    int16_t dst = (int16_t)fmin(fmax(src * -(double)INT16_MIN, INT16_MIN), INT16_MAX) - INT16_MIN;
+    double scaled = src * -(double)INT16_MIN;
+    int16_t dst = (int16_t)fmin(fmax(scaled, INT16_MIN), INT16_MAX);
+    dst -= INT16_MIN;
     return WRITE_BE(&dst, sizeof(dst));
 }
 
 int WriteS16L(TDA8425_Float src) {
-    int16_t dst = (int16_t)fmin(fmax(src * -(double)INT16_MIN, INT16_MIN), INT16_MAX);
+    double scaled = src * -(double)INT16_MIN;
+    int16_t dst = (int16_t)fmin(fmax(scaled, INT16_MIN), INT16_MAX);
     return WRITE_LE(&dst, sizeof(dst));
 }
 
 int WriteS16B(TDA8425_Float src) {
-    int16_t dst = (int16_t)fmin(fmax(src * -(double)INT16_MIN, INT16_MIN), INT16_MAX);
+    double scaled = src * -(double)INT16_MIN;
+    int16_t dst = (int16_t)fmin(fmax(scaled, INT16_MIN), INT16_MAX);
     return WRITE_BE(&dst, sizeof(dst));
 }
 
 int WriteU32L(TDA8425_Float src) {
-    int32_t dst = (int32_t)fmin(fmax(src * -(double)INT32_MIN, INT32_MIN), INT32_MAX) - INT32_MIN;
+    double scaled = src * -(double)INT32_MIN;
+    int32_t dst = (int32_t)fmin(fmax(scaled, INT32_MIN), INT32_MAX);
+    dst -= INT32_MIN;
     return WRITE_LE(&dst, sizeof(dst));
 }
 
 int WriteU32B(TDA8425_Float src) {
-    int32_t dst = (int32_t)fmin(fmax(src * -(double)INT32_MIN, INT32_MIN), INT32_MAX) - INT32_MIN;
+    double scaled = src * -(double)INT32_MIN;
+    int32_t dst = (int32_t)fmin(fmax(scaled, INT32_MIN), INT32_MAX);
+    dst -= INT32_MIN;
     return WRITE_BE(&dst, sizeof(dst));
 }
 
 int WriteS32L(TDA8425_Float src) {
-    int32_t dst = (int32_t)fmin(fmax(src * -(double)INT32_MIN, INT32_MIN), INT32_MAX);
+    double scaled = src * -(double)INT32_MIN;
+    int32_t dst = (int32_t)fmin(fmax(scaled, INT32_MIN), INT32_MAX);
     return WRITE_LE(&dst, sizeof(dst));
 }
 
 int WriteS32B(TDA8425_Float src) {
-    int32_t dst = (int32_t)fmin(fmax(src * -(double)INT32_MIN, INT32_MIN), INT32_MAX);
+    double scaled = src * -(double)INT32_MIN;
+    int32_t dst = (int32_t)fmin(fmax(scaled, INT32_MIN), INT32_MAX);
     return WRITE_BE(&dst, sizeof(dst));
 }
 
 int WriteU64L(TDA8425_Float src) {
-    int64_t dst = (int64_t)fmin(fmax(src * -(double)INT64_MIN, (double)INT64_MIN), (double)INT64_MAX) - INT64_MIN;
+    double scaled = src * -(double)INT64_MIN;
+    int64_t dst = (int64_t)fmin(fmax(scaled, (double)INT64_MIN), (double)INT64_MAX);
+    dst -= INT64_MIN;
     return WRITE_LE(&dst, sizeof(dst));
 }
 
 int WriteU64B(TDA8425_Float src) {
-    int64_t dst = (int64_t)fmin(fmax(src * -(double)INT64_MIN, (double)INT64_MIN), (double)INT64_MAX) - INT64_MIN;
+    double scaled = src * -(double)INT64_MIN;
+    int64_t dst = (int64_t)fmin(fmax(scaled, (double)INT64_MIN), (double)INT64_MAX);
+    dst -= INT64_MIN;
     return WRITE_BE(&dst, sizeof(dst));
 }
 
 int WriteS64L(TDA8425_Float src) {
-    int64_t dst = (int64_t)fmin(fmax(src * -(double)INT64_MIN, (double)INT64_MIN), (double)INT64_MAX);
+    double scaled = src * -(double)INT64_MIN;
+    int64_t dst = (int64_t)fmin(fmax(scaled, (double)INT64_MIN), (double)INT64_MAX);
     return WRITE_LE(&dst, sizeof(dst));
 }
 
 int WriteS64B(TDA8425_Float src) {
-    int64_t dst = (int64_t)fmin(fmax(src * -(double)INT64_MIN, (double)INT64_MIN), (double)INT64_MAX);
+    double scaled = src * -(double)INT64_MIN;
+    int64_t dst = (int64_t)fmin(fmax(scaled, (double)INT64_MIN), (double)INT64_MAX);
     return WRITE_BE(&dst, sizeof(dst));
 }
 
