@@ -69,8 +69,10 @@
 
 #	include <winsock2.h>
 //#	include <sys/param.h>
+#	include <winnt.h>
 
-#	if BYTE_ORDER == LITTLE_ENDIAN
+//#	if BYTE_ORDER == LITTLE_ENDIAN
+#	if REG_DWORD == REG_DWORD_LITTLE_ENDIAN
 
 #		define htobe16(x) htons(x)
 #		define htole16(x) (x)
@@ -87,7 +89,8 @@
 #		define be64toh(x) ntohll(x)
 #		define le64toh(x) (x)
 
-#	elif BYTE_ORDER == BIG_ENDIAN
+//#	elif BYTE_ORDER == BIG_ENDIAN
+#	elif REG_DWORD == REG_DWORD_BIG_ENDIAN
 
 		/* that would be xbox 360 */
 #		define htobe16(x) (x)
@@ -111,9 +114,9 @@
 
 #	endif
 
-#	define __BYTE_ORDER    BYTE_ORDER
-#	define __BIG_ENDIAN    BIG_ENDIAN
-#	define __LITTLE_ENDIAN LITTLE_ENDIAN
+#	define __BYTE_ORDER    REG_DWORD//BYTE_ORDER
+#	define __BIG_ENDIAN    REG_DWORD_BIG_ENDIAN//BIG_ENDIAN
+#	define __LITTLE_ENDIAN REG_DWORD_LITTLE_ENDIAN//LITTLE_ENDIAN
 #	define __PDP_ENDIAN    PDP_ENDIAN
 
 #else
