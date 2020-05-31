@@ -374,68 +374,89 @@ struct ModeTable {
 };
 
 
-static char const* USAGE = (
-"USAGE:\n\
-  pipe [OPTION]...\n\
+static char const* USAGE = ("\
+TDA8425_emu / pipe (c) 2020, Andrea Zoppi. All rights reserved.\n\
 \n\
-OPTION (evaluated in order):\n\
--b, --bass=[+|-]DECIBEL\n\
-    Bass gain [dB]; default: 0.\n\
-    Must belong to the possible bass gains.\n\
--c, --channels=COUNT\n\
-    Number of input channels; default: 1, max: 32.\n\
--f, --format=FORMAT\n\
-    Sample format name; default: U8.\n\
-    See FORMAT table.\n\
--m, --mode=MODE\n\
-    Stereo mode; default: linear.\n\
-    See MODE table.\n\
--r, --rate=RATE\n\
-    Sample rate [Hz]; default: 44100.\n\
--c, --channels=N\n\
-    Number of input channels; default: 1.\n\
--h, --help\n\
-    Prints this help message and quits.\n\
---pseudo-c1=FARAD\n\
-    Capacitance of pseudo C1 [F]; default: 15e-9.\n\
---pseudo-c2=FARAD\n\
-    Capacitance of pseudo C2 [F]; default: 15e-9.\n\
---pseudo-preset=PSEUDO_PRESET\n\
-    Pseudo-stereo capacitance preset; default 1.\n\
-    See PSEUDO_PRESET table.\n\
---reg_ba=[0x]HEX\n\
-    Value of BA (bass) register; hexadecimal string.\n\
---reg_sf=[0x]HEX\n\
-    Value of SF (switch function) register; hexadecimal string.\n\
---reg_tr=[0x]HEX\n\
-    Value of TR (treble) register; hexadecimal string.\n\
---reg_vl=[0x]HEX\n\
-    Value of VL (volume left) register; hexadecimal string.\n\
---reg_vr=[0x]HEX\n\
-    Value of VR (volume right) register; hexadecimal string.\n\
--s, --selector=SELECTOR\n\
-    Input source selector; default: S1.\n\
-    See SELECTOR table.\n\
--t, --treble=[+|-]DECIBEL\n\
-    Treble gain [dB]; default: 0.\n\
-    Must belong to the possible treble gains.\n\
--v, --volume=[+|-]DECIBEL\n\
-    Volume gain [dB]; default: 0.\n\
-    Must belong to the possible volume gains.\n\
---volume-left=[+|-]DECIBEL\n\
-    Left channel volume gain [dB]; default: 0.\n\
-    Must belong to the possible volume gains.\n\
---volume-right=[+|-]DECIBEL\n\
-    Right channel volume gain [dB]; default: 0.\n\
-    Must belong to the possible volume gains.\n\
-\n\
-This program emulates a TDA8425 Hi-fi stereo audio processor, made by\n\
+This program emulates a TDA8425 Hi - fi stereo audio processor, made by\n\
 Philips Semiconductors.\n\
 It reads a sample stream from standard input, processes data, and writes\n\
 to the standard output.\n\
 In case of multiple input channels, samples are interleaved. The format is\n\
 as specified by the --format option.\n\
 The output is always stereo, with the same sample format as per the input.\n\
+\n\
+\n\
+USAGE:\n\
+  pipe [OPTION]...\n\
+\n\
+\n\
+OPTION (evaluated as per command line argument order):\n\
+\n\
+-b, --bass DECIBEL_BASS\n\
+    Bass gain [dB]; default: 0.\n\
+    Must belong to the possible bass gains, see DECIBEL_BASS.\n\
+\n\
+-c, --channels COUNT\n\
+    Number of input channels; default: 1, max: 32.\n\
+\n\
+-f, --format FORMAT\n\
+    Sample format name; default: U8.\n\
+    See FORMAT table.\n\
+\n\
+-m, --mode MODE\n\
+    Stereo mode; default: linear.\n\
+    See MODE table.\n\
+\n\
+-r, --rate RATE\n\
+    Sample rate [Hz]; default: 44100.\n\
+\n\
+-h, --help\n\
+    Prints this help message and quits.\n\
+\n\
+--pseudo-c1 FARAD\n\
+    Capacitance of pseudo C1 [F]; default: 15e-9.\n\
+\n\
+--pseudo-c2 FARAD\n\
+    Capacitance of pseudo C2 [F]; default: 15e-9.\n\
+\n\
+--pseudo-preset PSEUDO_PRESET\n\
+    Pseudo-stereo capacitance preset; default 1.\n\
+    See PSEUDO_PRESET table.\n\
+\n\
+--reg_ba [0x]HEX\n\
+    Value of BA (bass) register; hexadecimal string.\n\
+\n\
+--reg_sf [0x]HEX\n\
+    Value of SF (switch function) register; hexadecimal string.\n\
+\n\
+--reg_tr [0x]HEX\n\
+    Value of TR (treble) register; hexadecimal string.\n\
+\n\
+--reg_vl [0x]HEX\n\
+    Value of VL (volume left) register; hexadecimal string.\n\
+\n\
+--reg_vr [0x]HEX\n\
+    Value of VR (volume right) register; hexadecimal string.\n\
+\n\
+-s, --selector SELECTOR\n\
+    Input source selector; default: S1.\n\
+    See SELECTOR table.\n\
+\n\
+-t, --treble DECIBEL_TREBLE\n\
+    Treble gain [dB]; default: 0.\n\
+    Must belong to the possible treble gains, see DECIBEL_TREBLE.\n\
+\n\
+-v, --volume DECIBEL_VOLUME\n\
+    Volume gain [dB]; default: 0.\n\
+    Must belong to the possible volume gains, see DECIBEL_VOLUME.\n\
+\n\
+--volume-left DECIBEL_VOLUME\n\
+    Left channel volume gain [dB]; default: 0.\n\
+    Must belong to the possible volume gains, see DECIBEL_VOLUME.\n\
+\n\
+--volume-right DECIBEL_VOLUME\n\
+    Right channel volume gain [dB]; default: 0.\n\
+    Must belong to the possible volume gains, see DECIBEL_VOLUME.\n\
 \n\
 \n\
 FORMAT:\n\
@@ -445,27 +466,17 @@ FORMAT:\n\
 | U8         |    8 | no   | same   |\n\
 | S8         |    8 | yes  | same   |\n\
 | U16_LE     |   16 | no   | little |\n\
-| U16_BE     |   16 | yes  | big    |\n\
-| S16_LE     |   16 | no   | little |\n\
+| U16_BE     |   16 | no   | big    |\n\
+| S16_LE     |   16 | yes  | little |\n\
 | S16_BE     |   16 | yes  | big    |\n\
 | U32_LE     |   32 | no   | little |\n\
-| U32_BE     |   32 | yes  | big    |\n\
-| S32_LE     |   32 | no   | little |\n\
+| U32_BE     |   32 | no   | big    |\n\
+| S32_LE     |   32 | yes  | little |\n\
 | S32_BE     |   32 | yes  | big    |\n\
 | FLOAT_LE   |   32 | yes  | little |\n\
 | FLOAT_BE   |   32 | yes  | big    |\n\
 | FLOAT64_LE |   64 | yes  | little |\n\
 | FLOAT64_BE |   64 | yes  | big    |\n\
-\n\
-\n\
-SELECTOR:\n\
-\n\
-- S1: Source 1, stereo (default).\n\
-- A1: Source 1, channel A (left).\n\
-- B1: Source 1, channel B (right).\n\
-- S2: Source 2, stereo.\n\
-- A2: Source 2, channel A (left).\n\
-- B2: Source 2, channel B (right).\n\
 \n\
 \n\
 MODE:\n\
@@ -483,6 +494,38 @@ PSEUDO_PRESET:\n\
 | 1 |      15 |      15 |\n\
 | 2 |     5.6 |      47 |\n\
 | 3 |     5.6 |      68 |\n\
+\n\
+\n\
+SELECTOR:\n\
+\n\
+- S1: Source 1, stereo (default).\n\
+- A1: Source 1, channel A (left).\n\
+- B1: Source 1, channel B (right).\n\
+- S2: Source 2, stereo.\n\
+- A2: Source 2, channel A (left).\n\
+- B2: Source 2, channel B (right).\n\
+\n\
+\n\
+DECIBEL_BASS:\n\
+\n\
+- minimum: -12\n\
+- maximum: +15\n\
+- step:      3\n\
+\n\
+\n\
+DECIBEL_TREBLE:\n\
+\n\
+- minimum: -12\n\
+- maximum: +12\n\
+- step:      3\n\
+\n\
+\n\
+DECIBEL_VOLUME:\n\
+\n\
+- minimum: -64\n\
+- maximum:  +6\n\
+- step:      2\n\
+- mute:   -128\n\
 \n\
 \n\
 LICENSE:\n\
