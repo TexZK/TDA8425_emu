@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 import numpy as np
 import matplotlib.pyplot as plt
-import sounddevice as sd
-import soundfile as sf
+# import sounddevice as sd
+# import soundfile as sf
 from IPython.display import display
 from sympy import *
 
@@ -24,12 +24,14 @@ init_printing(use_latex='mathjax')
 
 #%%
 
-s, z, R1, C1, R2, C2, T = symbols('s z R1 C1 R2 C2 T')
+s, z, R1, C1, R2, C2, T, k = symbols('s z R1 C1 R2 C2 T k')
 
-Hs = ((1 - s*R1*C1) / (1 + s*R1*C1)) * ((1 - s*R2*C2)/(1 + s*R2*C2))
+Hs1 = (1 - s*R1*C1) / (1 + s*R1*C1)
+Hs2 = (1 - s*R2*C2) / (1 + s*R2*C2)
+Hs = Hs1 * Hs2
 spprint('H(s):', Hs)
 
-Hz = Hs.subs(s, (2/T * (z - 1) / (z + 1)))
+Hz = Hs.subs(s, (1/k * (z - 1) / (z + 1)))
 spprint('H(z):', Hz)
 
 Hzr = simplify(Hz)
@@ -38,14 +40,18 @@ spprint('H(z) simp:', Hzr)
 Hzrn = collect(expand(numer(Hzr)), z)
 spprint('H(z) numer:', Hzrn)
 
-b = Poly(Hzrn, z).as_list()
-spprint('H(z) numer coeffs:', b, plain=True)
-
 Hzrd = collect(expand(denom(Hzr)), z)
 spprint('H(z) denom:', Hzrd)
 
 a = Poly(Hzrd, z).as_list()
 spprint('H(z) denom coeffs:', a, plain=True)
+for i, x in enumerate(a):
+    print(f'a{i}: {x}')
+
+b = Poly(Hzrn, z).as_list()
+spprint('H(z) numer coeffs:', b, plain=True)
+for i, x in enumerate(b):
+    print(f'b{i}: {x}')
 
 
 #%%
@@ -56,19 +62,22 @@ dtype = np.float64
 # dtype = np.float32
 
 # x, Fs = sf.read(r'E:\Downloads\doom.wav', dtype=stype.__name__)
-#x = x[:Fs*D]
+# x = x[:Fs*D]
 
 
 values = {
     C1: 15e-9,
 #    C1: 5.6e-9,
+#    C1: 5.6e-9,
     R1: 13e3,
 
     C2: 15e-9,
+#    C2: 47e-9,
 #    C2: 68e-9,
     R2: 13e3,
 
-    T: 1/Fs,
+    T: 1 / Fs,
+    k: 0.5 / Fs,
 }
 
 f1 = 1/(2*pi*values[R1]*values[C1])
@@ -95,18 +104,18 @@ spprint('y(z):', yzv)
 
 av = np.array([dtype(v.subs(values)) for v in a], dtype=dtype)
 bv = np.array([dtype(v.subs(values)) for v in b], dtype=dtype)
-k = dtype(1/av[0]) * np.array([-av[1], -av[2], bv[0], bv[1], bv[2]], dtype=dtype)
+c = dtype(1/av[0]) * np.array([-av[1], -av[2], bv[0], bv[1], bv[2]], dtype=dtype)
 
 dtype = np.float32
-k = np.array(k, dtype=dtype)
-k0, k1, k2, k3, k4 = k
+c = np.array(c, dtype=dtype)
+c0, c1, c2, c3, c4 = c
 
 t = np.linspace(0, len(x), len(x), dtype=dtype)
 
 y = np.zeros_like(x, dtype=dtype)
 
 for ti in range(2, len(t)):
-    y[ti] = (y[ti-1]*k0 + y[ti-2]*k1) + (x[ti]*k2 + x[ti-1]*k3 + x[ti-2]*k4)
+    y[ti] = (y[ti-1]*c0 + y[ti-2]*c1) + (x[ti]*c2 + x[ti-1]*c3 + x[ti-2]*c4)
 
 #%%
 
@@ -115,17 +124,17 @@ plt.grid(1)
 plt.plot(t, x)
 plt.plot(t, y)
 
-#plt.plot(t, y2)
+# plt.plot(t, y2)
 # plt.grid(1); plt.plot(t, np.log2(np.abs(y2-y)))
 
 
 #%%
 
-#x_y = np.empty((x.size + y.size,), dtype=x.dtype)
-#x_y[0::2] = x
-#x_y[1::2] = y
-#x_y = np.vstack((x, x)).T
+# x_y = np.empty((x.size + y.size,), dtype=x.dtype)
+# x_y[0::2] = x
+# x_y[1::2] = y
+# x_y = np.vstack((x, x)).T
 x_y = np.vstack((x, y)).T
 
 # sd.play(x_y, samplerate=Fs, loop=False, blocking=False)
-#sd.stop()
+# sd.stop()

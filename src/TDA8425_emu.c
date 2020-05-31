@@ -279,6 +279,7 @@ void TDA8425_BiQuadModelFloat_SetupPseudo(
 )
 {
     double fs = sample_rate;
+    double k = 0.5 / fs;
 
     double c1 = pseudo_c1;
     double c2 = pseudo_c2;
@@ -286,20 +287,20 @@ void TDA8425_BiQuadModelFloat_SetupPseudo(
     double r1 = (double)TDA8425_Pseudo_R1;
     double r2 = (double)TDA8425_Pseudo_R2;
 
-    double w1 = c1 * r1;
-    double w2 = c2 * r2;
+    double t1 = c1 * r1;
+    double t2 = c2 * r2;
 
-    double k1 = (w1 * w2) * 4;
-    double k2 = (w1 + w2) * (2 / fs);
-    double tt = 1 / (fs * fs);
+    double kk = k * k;
+    double t1_t2 = t1 * t2;
+    double t1_t2_k = (t1 + t2) * k;
 
-    double a0 = k1 + k2 + tt;
-    double a1 = (tt - k1) * 2;
-    double a2 = k1 - k2 + tt;
+    double a0 = kk + t1_t2 + t1_t2_k;
+    double a1 = (kk - t1_t2) * 2;
+    double a2 = kk + t1_t2 - t1_t2_k;
 
-    double b0 = k1 - k2 + tt;
-    double b1 = (tt - k1) * 2;
-    double b2 = k1 + k2 + tt;
+    double b0 = a2;
+    double b1 = a1;
+    double b2 = a0;
 
     double ra0 = 1 / a0;
 
@@ -319,39 +320,25 @@ void TDA8425_BiQuadModelFloat_SetupBass(
     TDA8425_Float bass_gain
 )
 {
-    double fs = sample_rate;
-    double w = (2 * M_PI) * (double)TDA8425_Bass_Frequency;
-    double s = 1;
     double g = sqrt(bass_gain);
+    double fs = sample_rate;
+    double k = 0.5 / fs;
+    double w = (2 * M_PI) * (double)TDA8425_Bass_Frequency;
 
-    double p = w / fs;
-    double cw = cos(p);
-    double sw = sin(p);
+    double a0 = (k * w) + g;
+    double a1 = (k * w) - g;
 
-    double gm1 = g - 1;
-    double gp1 = g + 1;
-
-    double gm1_cw = gm1 * cw;
-    double gp1_cw = gp1 * cw;
-
-    double h = sw * sqrt((g * g + 1) * (1 / (g * s) - 1) + g * 2);
-
-    double a0 = (gp1 + gm1_cw + h)         ;
-    double a1 = (gm1 + gp1_cw    )     * -2;
-    double a2 = (gp1 + gm1_cw - h)         ;
-
-    double b0 = (gp1 - gm1_cw + h) * g     ;
-    double b1 = (gm1 - gp1_cw    ) * g *  2;
-    double b2 = (gp1 - gm1_cw - h) * g     ;
+    double b0 = ((k * w) * (g * g)) + g;
+    double b1 = ((k * w) * (g * g)) - g;
 
     double ra0 = 1 / a0;
 
     model->b0 = (TDA8425_Float)(b0 *  ra0);
     model->b1 = (TDA8425_Float)(b1 *  ra0);
-    model->b2 = (TDA8425_Float)(b2 *  ra0);
+    model->b2 = 0;
 
     model->a1 = (TDA8425_Float)(a1 * -ra0);
-    model->a2 = (TDA8425_Float)(a2 * -ra0);
+    model->a2 = 0;
 }
 
 // ----------------------------------------------------------------------------
@@ -362,39 +349,25 @@ void TDA8425_BiQuadModelFloat_SetupTreble(
     TDA8425_Float treble_gain
 )
 {
-    double fs = sample_rate;
-    double w = (2 * M_PI) * (double)TDA8425_Treble_Frequency;
-    double s = 1;
     double g = sqrt(treble_gain);
+    double fs = sample_rate;
+    double k = 0.5 / fs;
+    double w = (2 * M_PI) * (double)TDA8425_Treble_Frequency;
 
-    double p = w / fs;
-    double cw = cos(p);
-    double sw = sin(p);
+    double a0 = ((k * w) * (g * g)) + g;
+    double a1 = ((k * w) * (g * g)) - g;
 
-    double gm1 = g - 1;
-    double gp1 = g + 1;
-
-    double gm1_cw = gm1 * cw;
-    double gp1_cw = gp1 * cw;
-
-    double h = sw * sqrt((g * g + 1) * (1 / s - 1) + g * 2);
-
-    double a0 = (gp1 - gm1_cw + h)         ;
-    double a1 = (gm1 - gp1_cw    )     *  2;
-    double a2 = (gp1 - gm1_cw - h)         ;
-
-    double b0 = (gp1 + gm1_cw + h) * g     ;
-    double b1 = (gm1 + gp1_cw    ) * g * -2;
-    double b2 = (gp1 + gm1_cw - h) * g     ;
+    double b0 = (k * w) + g;
+    double b1 = (k * w) - g;
 
     double ra0 = 1 / a0;
 
-    model->b0 = (TDA8425_Float)(b0 *  ra0);
-    model->b1 = (TDA8425_Float)(b1 *  ra0);
-    model->b2 = (TDA8425_Float)(b2 *  ra0);
+    model->b0 = (TDA8425_Float)(b0 * ra0);
+    model->b1 = (TDA8425_Float)(b1 * ra0);
+    model->b2 = 0;
 
     model->a1 = (TDA8425_Float)(a1 * -ra0);
-    model->a2 = (TDA8425_Float)(a2 * -ra0);
+    model->a2 = 0;
 }
 
 // ----------------------------------------------------------------------------
@@ -749,8 +722,8 @@ void TDA8425_ChipFloat_Write(
         data |= (TDA8425_Register)~TDA8425_Switch_Data_Mask;
         self->reg_sf_ = data;
 
-        self->selector_ = (TDA8425_Selector)(self->reg_sf_ & 7);
-        self->mode_ = (TDA8425_Mode)((self->reg_sf_ >> TDA8425_Reg_SF_STL) & 3);
+        self->selector_ = (TDA8425_Selector)self->reg_sf_ & TDA8425_Selector_Mask;
+        self->mode_ = (TDA8425_Mode)(self->reg_sf_ >> TDA8425_Reg_SF_STL) & TDA8425_Mode_Mask;
         break;
     }
     default:

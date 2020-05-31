@@ -72,6 +72,7 @@ typedef enum TDA8425_Reg_SF_Bit {
     TDA8425_Reg_SF_STL   = 3,
     TDA8425_Reg_SF_EFL   = 4,
     TDA8425_Reg_SF_MU    = 5,
+
     TDA8425_Reg_SF_Count = 6
 } TDA8425_Reg_SF_Bit;
 
@@ -79,6 +80,7 @@ typedef enum TDA8425_Reg_SF_Bit {
 typedef enum TDA8425_Stereo {
     TDA8425_Stereo_L     = 0,
     TDA8425_Stereo_R     = 1,
+
     TDA8425_Stereo_Count = 2
 } TDA8425_Stereo;
 
@@ -86,6 +88,7 @@ typedef enum TDA8425_Stereo {
 typedef enum TDA8425_Source {
     TDA8425_Source_1     = 0,
     TDA8425_Source_2     = 1,
+
     TDA8425_Source_Count = 2
 } TDA8425_Source;
 
@@ -96,7 +99,9 @@ typedef enum TDA8425_Selector {
     TDA8425_Selector_Sound_B_1 = 4,
     TDA8425_Selector_Sound_B_2 = 5,
     TDA8425_Selector_Stereo_1  = 6,
-    TDA8425_Selector_Stereo_2  = 7
+    TDA8425_Selector_Stereo_2  = 7,
+
+    TDA8425_Selector_Mask      = 7
 } TDA8425_Selector;
 
 //! Mode selectors as bit concatenation: STL.EFL
@@ -105,13 +110,16 @@ typedef enum TDA8425_Mode {
     TDA8425_Mode_LinearStereo  = 1,
     TDA8425_Mode_PseudoStereo  = 2,
     TDA8425_Mode_SpatialStereo = 3,
-    TDA8425_Mode_Count         = 4
+
+    TDA8425_Mode_Count         = 4,
+    TDA8425_Mode_Mask          = TDA8425_Mode_Count - 1
 } TDA8425_Mode;
 
 //! Auto-mute mode
 typedef enum TDA8425_AutoMute {
     TDA8425_AutoMute_AfterPOR  = 0,
     TDA8425_AutoMute_NotActive = 1,
+
     TDA8425_AutoMute_Count     = 2
 } TDA8425_AutoMute;
 
@@ -120,6 +128,7 @@ typedef enum TDA8425_Pseudo_Preset {
     TDA8425_Pseudo_Preset_1     = 0,
     TDA8425_Pseudo_Preset_2     = 1,
     TDA8425_Pseudo_Preset_3     = 2,
+
     TDA8425_Pseudo_Preset_Count = 3
 } TDA8425_Pseudo_Preset;
 
@@ -139,7 +148,7 @@ enum TDA8425_DatasheetSpecifications {
     TDA8425_Switch_Data_Mask  = (1 << TDA8425_Switch_Data_Bits) - 1,
 
     TDA8425_Bass_Frequency    =  300,  // [Hz]
-    TDA8425_Treble_Frequency  = 3600,  // [Hz]
+    TDA8425_Treble_Frequency  = 3000,  // [Hz]
 
     TDA8425_Pseudo_R1         = 13000,  // [ohm]
     TDA8425_Pseudo_R2         = 13000,  // [ohm]
