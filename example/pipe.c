@@ -381,7 +381,7 @@ static char const* USAGE = (
 OPTION (evaluated in order):\n\
 -b, --bass=[+|-]DECIBEL\n\
     Bass gain [dB]; default: 0.\n\
-    Must belong to the possible gains.\n\
+    Must belong to the possible bass gains.\n\
 -c, --channels=COUNT\n\
     Number of input channels; default: 1, max: 32.\n\
 -f, --format=FORMAT\n\
@@ -418,7 +418,16 @@ OPTION (evaluated in order):\n\
     See SELECTOR table.\n\
 -t, --treble=[+|-]DECIBEL\n\
     Treble gain [dB]; default: 0.\n\
-    Must belong to the possible gains.\n\
+    Must belong to the possible treble gains.\n\
+-v, --volume=[+|-]DECIBEL\n\
+    Volume gain [dB]; default: 0.\n\
+    Must belong to the possible volume gains.\n\
+--volume-left=[+|-]DECIBEL\n\
+    Left channel volume gain [dB]; default: 0.\n\
+    Must belong to the possible volume gains.\n\
+--volume-right=[+|-]DECIBEL\n\
+    Right channel volume gain [dB]; default: 0.\n\
+    Must belong to the possible volume gains.\n\
 \n\
 This program emulates a TDA8425 Hi-fi stereo audio processor, made by\n\
 Philips Semiconductors.\n\
@@ -671,6 +680,50 @@ int main(int argc, char const* argv[])
             }
             if (j >= TDA8425_Tone_Data_Count) {
                 fprintf(stderr, "Unsupported treble decibel gain: %s", argv[i]);
+                return 1;
+            }
+        }
+        else if (!strcmp(argv[i], "-v") ||
+                 !strcmp(argv[i], "--volume")) {
+            long db = strtol(argv[++i], NULL, 10);
+            int j;
+            for (j = 0; j < TDA8425_Volume_Data_Count; ++j) {
+                if (TDA8425_VolumeDecibel_Table[j] == db) {
+                    reg_vl = (TDA8425_Register)j;
+                    reg_vr = (TDA8425_Register)j;
+                    break;
+                }
+            }
+            if (j >= TDA8425_Volume_Data_Count) {
+                fprintf(stderr, "Unsupported volume decibel gain: %s", argv[i]);
+                return 1;
+            }
+        }
+        else if (!strcmp(argv[i], "--volume-left")) {
+            long db = strtol(argv[++i], NULL, 10);
+            int j;
+            for (j = 0; j < TDA8425_Volume_Data_Count; ++j) {
+                if (TDA8425_VolumeDecibel_Table[j] == db) {
+                    reg_vl = (TDA8425_Register)j;
+                    break;
+                }
+            }
+            if (j >= TDA8425_Volume_Data_Count) {
+                fprintf(stderr, "Unsupported volume decibel gain: %s", argv[i]);
+                return 1;
+            }
+        }
+        else if (!strcmp(argv[i], "--volume-right")) {
+            long db = strtol(argv[++i], NULL, 10);
+            int j;
+            for (j = 0; j < TDA8425_Volume_Data_Count; ++j) {
+                if (TDA8425_VolumeDecibel_Table[j] == db) {
+                    reg_vr = (TDA8425_Register)j;
+                    break;
+                }
+            }
+            if (j >= TDA8425_Volume_Data_Count) {
+                fprintf(stderr, "Unsupported volume decibel gain: %s", argv[i]);
                 return 1;
             }
         }

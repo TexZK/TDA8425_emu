@@ -159,46 +159,17 @@ enum TDA8425_DatasheetSpecifications {
 // ============================================================================
 
 extern signed char const TDA8425_VolumeDecibel_Table[TDA8425_Volume_Data_Count];
-extern TDA8425_Float const TDA8425_VolumeLinear_Table[TDA8425_Volume_Data_Count];
-
 extern signed char const TDA8425_BassDecibel_Table[TDA8425_Tone_Data_Count];
-extern TDA8425_Float const TDA8425_BassLinear_Table[TDA8425_Tone_Data_Count];
-
 extern signed char const TDA8425_TrebleDecibel_Table[TDA8425_Tone_Data_Count];
-extern TDA8425_Float const TDA8425_TrebleLinear_Table[TDA8425_Tone_Data_Count];
 
 extern TDA8425_Float const TDA8425_Pseudo_C1_Table[TDA8425_Pseudo_Preset_Count];
 extern TDA8425_Float const TDA8425_Pseudo_C2_Table[TDA8425_Pseudo_Preset_Count];
 
 // ----------------------------------------------------------------------------
 
-TDA8425_INLINE
-TDA8425_Float TDA8425_RegisterToVolume(TDA8425_Register data)
-{
-    TDA8425_Register index = data & (TDA8425_Register)TDA8425_Volume_Data_Mask;
-    TDA8425_Float volume_gain = TDA8425_VolumeLinear_Table[index];
-    return volume_gain;
-}
-
-// ----------------------------------------------------------------------------
-
-TDA8425_INLINE
-TDA8425_Float TDA8425_RegisterToBass(TDA8425_Register data)
-{
-    TDA8425_Register index = data & (TDA8425_Register)TDA8425_Tone_Data_Mask;
-    TDA8425_Float bass_gain = TDA8425_BassLinear_Table[index];
-    return bass_gain;
-}
-
-// ----------------------------------------------------------------------------
-
-TDA8425_INLINE
-TDA8425_Float TDA8425_RegisterToTreble(TDA8425_Register data)
-{
-    TDA8425_Register index = data & (TDA8425_Register)TDA8425_Tone_Data_Mask;
-    TDA8425_Float treble_gain = TDA8425_TrebleLinear_Table[index];
-    return treble_gain;
-}
+TDA8425_Float TDA8425_RegisterToVolume(TDA8425_Register data);
+TDA8425_Float TDA8425_RegisterToBass(TDA8425_Register data);
+TDA8425_Float TDA8425_RegisterToTreble(TDA8425_Register data);
 
 // ============================================================================
 

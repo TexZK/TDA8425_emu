@@ -101,74 +101,6 @@ signed char const TDA8425_VolumeDecibel_Table[TDA8425_Volume_Data_Count] =
     +  6   // 63
 };
 
-TDA8425_Float const TDA8425_VolumeLinear_Table[TDA8425_Volume_Data_Count] =
-{
-    (TDA8425_Float)0.000000000000000000,  //  0
-    (TDA8425_Float)0.000000000000000000,  //  1
-    (TDA8425_Float)0.000000000000000000,  //  2
-    (TDA8425_Float)0.000000000000000000,  //  3
-    (TDA8425_Float)0.000000000000000000,  //  4
-    (TDA8425_Float)0.000000000000000000,  //  5
-    (TDA8425_Float)0.000000000000000000,  //  6
-    (TDA8425_Float)0.000000000000000000,  //  7
-    (TDA8425_Float)0.000000000000000000,  //  8
-    (TDA8425_Float)0.000000000000000000,  //  9
-    (TDA8425_Float)0.000000000000000000,  // 10
-    (TDA8425_Float)0.000000000000000000,  // 11
-    (TDA8425_Float)0.000000000000000000,  // 12
-    (TDA8425_Float)0.000000000000000000,  // 13
-    (TDA8425_Float)0.000000000000000000,  // 14
-    (TDA8425_Float)0.000000000000000000,  // 15
-    (TDA8425_Float)0.000000000000000000,  // 16
-    (TDA8425_Float)0.000000000000000000,  // 17
-    (TDA8425_Float)0.000000000000000000,  // 18
-    (TDA8425_Float)0.000000000000000000,  // 19
-    (TDA8425_Float)0.000000000000000000,  // 20
-    (TDA8425_Float)0.000000000000000000,  // 21
-    (TDA8425_Float)0.000000000000000000,  // 22
-    (TDA8425_Float)0.000000000000000000,  // 23
-    (TDA8425_Float)0.000000000000000000,  // 24
-    (TDA8425_Float)0.000000000000000000,  // 25
-    (TDA8425_Float)0.000000000000000000,  // 26
-    (TDA8425_Float)0.000000000000000000,  // 27
-    (TDA8425_Float)0.000630957344480193,  // 28
-    (TDA8425_Float)0.000794328234724281,  // 29
-    (TDA8425_Float)0.001000000000000000,  // 30
-    (TDA8425_Float)0.001258925411794167,  // 31
-    (TDA8425_Float)0.001584893192461114,  // 32
-    (TDA8425_Float)0.001995262314968879,  // 33
-    (TDA8425_Float)0.002511886431509579,  // 34
-    (TDA8425_Float)0.003162277660168379,  // 35
-    (TDA8425_Float)0.003981071705534973,  // 36
-    (TDA8425_Float)0.005011872336272725,  // 37
-    (TDA8425_Float)0.006309573444801930,  // 38
-    (TDA8425_Float)0.007943282347242814,  // 39
-    (TDA8425_Float)0.010000000000000000,  // 40
-    (TDA8425_Float)0.012589254117941675,  // 41
-    (TDA8425_Float)0.015848931924611134,  // 42
-    (TDA8425_Float)0.019952623149688799,  // 43
-    (TDA8425_Float)0.025118864315095794,  // 44
-    (TDA8425_Float)0.031622776601683791,  // 45
-    (TDA8425_Float)0.039810717055349734,  // 46
-    (TDA8425_Float)0.050118723362727220,  // 47
-    (TDA8425_Float)0.063095734448019331,  // 48
-    (TDA8425_Float)0.079432823472428138,  // 49
-    (TDA8425_Float)0.100000000000000006,  // 50
-    (TDA8425_Float)0.125892541179416728,  // 51
-    (TDA8425_Float)0.158489319246111343,  // 52
-    (TDA8425_Float)0.199526231496887974,  // 53
-    (TDA8425_Float)0.251188643150958013,  // 54
-    (TDA8425_Float)0.316227766016837941,  // 55
-    (TDA8425_Float)0.398107170553497203,  // 56
-    (TDA8425_Float)0.501187233627272244,  // 57
-    (TDA8425_Float)0.630957344480193250,  // 58
-    (TDA8425_Float)0.794328234724281490,  // 59
-    (TDA8425_Float)1.000000000000000000,  // 60
-    (TDA8425_Float)1.258925411794167282,  // 61
-    (TDA8425_Float)1.584893192461113598,  // 62
-    (TDA8425_Float)1.995262314968879513   // 63
-};
-
 // ----------------------------------------------------------------------------
 
 signed char const TDA8425_BassDecibel_Table[TDA8425_Tone_Data_Count] =
@@ -189,26 +121,6 @@ signed char const TDA8425_BassDecibel_Table[TDA8425_Tone_Data_Count] =
     +15,  // 13
     +15,  // 14
     +15   // 15
-};
-
-TDA8425_Float const TDA8425_BassLinear_Table[TDA8425_Tone_Data_Count] =
-{
-    (TDA8425_Float)0.251188643150958013,  //  0
-    (TDA8425_Float)0.251188643150958013,  //  1
-    (TDA8425_Float)0.251188643150958013,  //  2
-    (TDA8425_Float)0.354813389233575471,  //  3
-    (TDA8425_Float)0.501187233627272244,  //  4
-    (TDA8425_Float)0.707945784384137911,  //  5
-    (TDA8425_Float)1.000000000000000000,  //  6
-    (TDA8425_Float)1.412537544622754382,  //  7
-    (TDA8425_Float)1.995262314968879513,  //  8
-    (TDA8425_Float)2.818382931264453717,  //  9
-    (TDA8425_Float)3.981071705534972249,  // 10
-    (TDA8425_Float)5.623413251903491172,  // 11
-    (TDA8425_Float)5.623413251903491172,  // 12
-    (TDA8425_Float)5.623413251903491172,  // 13
-    (TDA8425_Float)5.623413251903491172,  // 14
-    (TDA8425_Float)5.623413251903491172   // 15
 };
 
 // ----------------------------------------------------------------------------
@@ -233,26 +145,6 @@ signed char const TDA8425_TrebleDecibel_Table[TDA8425_Tone_Data_Count] =
     +12   // 15
 };
 
-TDA8425_Float const TDA8425_TrebleLinear_Table[TDA8425_Tone_Data_Count] =
-{
-    (TDA8425_Float)0.251188643150958013,  //  0
-    (TDA8425_Float)0.251188643150958013,  //  1
-    (TDA8425_Float)0.251188643150958013,  //  2
-    (TDA8425_Float)0.354813389233575471,  //  3
-    (TDA8425_Float)0.501187233627272244,  //  4
-    (TDA8425_Float)0.707945784384137911,  //  5
-    (TDA8425_Float)1.000000000000000000,  //  6
-    (TDA8425_Float)1.412537544622754382,  //  7
-    (TDA8425_Float)1.995262314968879513,  //  8
-    (TDA8425_Float)2.818382931264453717,  //  9
-    (TDA8425_Float)3.981071705534972249,  // 10
-    (TDA8425_Float)3.981071705534972249,  // 11
-    (TDA8425_Float)3.981071705534972249,  // 12
-    (TDA8425_Float)3.981071705534972249,  // 13
-    (TDA8425_Float)3.981071705534972249,  // 14
-    (TDA8425_Float)3.981071705534972249   // 15
-};
-
 // ----------------------------------------------------------------------------
 
 TDA8425_Float const TDA8425_Pseudo_C1_Table[TDA8425_Pseudo_Preset_Count] =
@@ -268,6 +160,36 @@ TDA8425_Float const TDA8425_Pseudo_C2_Table[TDA8425_Pseudo_Preset_Count] =
     (TDA8425_Float)47.e-9,
     (TDA8425_Float)68.e-9
 };
+
+// ----------------------------------------------------------------------------
+
+TDA8425_Float TDA8425_RegisterToVolume(TDA8425_Register data)
+{
+    TDA8425_Register n = data & (TDA8425_Register)TDA8425_Volume_Data_Mask;
+    double db = (double)TDA8425_VolumeDecibel_Table[n];
+    double g = pow(10.0, db * 0.05);
+    return (TDA8425_Float)g;
+}
+
+// ----------------------------------------------------------------------------
+
+TDA8425_Float TDA8425_RegisterToBass(TDA8425_Register data)
+{
+    TDA8425_Register n = data & (TDA8425_Register)TDA8425_Tone_Data_Mask;
+    double db = (double)TDA8425_BassDecibel_Table[n];
+    double g = pow(10.0, db * 0.05);
+    return (TDA8425_Float)g;
+}
+
+// ----------------------------------------------------------------------------
+
+TDA8425_Float TDA8425_RegisterToTreble(TDA8425_Register data)
+{
+    TDA8425_Register n = data & (TDA8425_Register)TDA8425_Tone_Data_Mask;
+    double db = (double)TDA8425_TrebleDecibel_Table[n];
+    double g = pow(10.0, db * 0.05);
+    return (TDA8425_Float)g;
+}
 
 // ============================================================================
 
@@ -676,31 +598,24 @@ void TDA8425_ChipFloat_Write(
         data |= (TDA8425_Register)~TDA8425_Volume_Data_Mask;
         self->reg_vl_ = data;
 
-        TDA8425_Register index = data & TDA8425_Volume_Data_Mask;
-        TDA8425_Float gain = TDA8425_VolumeLinear_Table[index];
-        self->volume_[TDA8425_Stereo_L] = gain;
+        self->volume_[TDA8425_Stereo_L] = TDA8425_RegisterToVolume(data);
         break;
     }
     case TDA8425_Reg_VR: {
         data |= (TDA8425_Register)~TDA8425_Volume_Data_Mask;
         self->reg_vr_ = data;
 
-        TDA8425_Register index = data & TDA8425_Volume_Data_Mask;
-        TDA8425_Float gain = TDA8425_VolumeLinear_Table[index];
-        self->volume_[TDA8425_Stereo_R] = gain;
+        self->volume_[TDA8425_Stereo_R] = TDA8425_RegisterToVolume(data);
         break;
     }
     case TDA8425_Reg_BA: {
         data |= (TDA8425_Register)~TDA8425_Tone_Data_Mask;
         self->reg_ba_ = data;
 
-        TDA8425_Register index = data & TDA8425_Tone_Data_Mask;
-        TDA8425_Float gain = TDA8425_BassLinear_Table[index];
-
         TDA8425_BiQuadModelFloat_SetupBass(
             &self->bass_model_,
             self->sample_rate_,
-            gain
+            TDA8425_RegisterToBass(data)
         );
         break;
     }
@@ -708,13 +623,10 @@ void TDA8425_ChipFloat_Write(
         data |= (TDA8425_Register)~TDA8425_Tone_Data_Mask;
         self->reg_tr_ = data;
 
-        TDA8425_Register index = data & TDA8425_Tone_Data_Mask;
-        TDA8425_Float gain = TDA8425_TrebleLinear_Table[index];
-
         TDA8425_BiQuadModelFloat_SetupTreble(
             &self->treble_model_,
             self->sample_rate_,
-            gain
+            TDA8425_RegisterToTreble(data)
         );
         break;
     }
@@ -722,8 +634,13 @@ void TDA8425_ChipFloat_Write(
         data |= (TDA8425_Register)~TDA8425_Switch_Data_Mask;
         self->reg_sf_ = data;
 
-        self->selector_ = (TDA8425_Selector)self->reg_sf_ & TDA8425_Selector_Mask;
-        self->mode_ = (TDA8425_Mode)(self->reg_sf_ >> TDA8425_Reg_SF_STL) & TDA8425_Mode_Mask;
+        TDA8425_Register reg_selector = self->reg_sf_;
+        reg_selector &= (TDA8425_Register)TDA8425_Selector_Mask;
+        self->selector_ = (TDA8425_Selector)reg_selector;
+
+        TDA8425_Register reg_mode = self->reg_sf_ >> TDA8425_Reg_SF_STL;
+        reg_mode &= (TDA8425_Register)TDA8425_Mode_Mask;
+        self->mode_ = (TDA8425_Mode)reg_mode;
         break;
     }
     default:
