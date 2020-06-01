@@ -153,7 +153,7 @@ enum TDA8425_DatasheetSpecifications {
     TDA8425_Pseudo_R1         = 13000,  // [ohm]
     TDA8425_Pseudo_R2         = 13000,  // [ohm]
 
-    TDA8425_Spatial_Antiphase = 52,  // [%]
+    TDA8425_Spatial_Crosstalk = 52,  // [%]
 };
 
 // ============================================================================

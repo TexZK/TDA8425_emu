@@ -40,7 +40,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 static char const* USAGE = ("\
-TDA8425_emu / pipe (c) 2020, Andrea Zoppi. All rights reserved.\n\
+TDA8425_pipe (c) 2020, Andrea Zoppi. All rights reserved.\n\
 \n\
 This program emulates a TDA8425 Hi - fi stereo audio processor, made by\n\
 Philips Semiconductors.\n\
@@ -600,7 +600,7 @@ int main(int argc, char const* argv[])
         // Unary arguments
         if (!strcmp(argv[i], "-h") ||
             !strcmp(argv[i], "--help")) {
-            fprintf(stderr, USAGE);
+            puts(USAGE);
             return 0;
         }
 

@@ -517,17 +517,11 @@ void TDA8425_ChipFloat_Process(
         break;
     }
     case TDA8425_Mode_SpatialStereo: {
-        TDA8425_Float l1 = stereo[TDA8425_Stereo_L];
-        TDA8425_Float r1 = stereo[TDA8425_Stereo_R];
-        TDA8425_Float c1 = l1 + r1;
-        TDA8425_Float l2 = l1 - c1;
-        TDA8425_Float r2 = r1 - c1;
-        TDA8425_Float k = ((TDA8425_Float)TDA8425_Spatial_Antiphase / 100);
-        TDA8425_Float c2 = c1 * (1 - (1 - k) / 2);
-        TDA8425_Float l3 = l2 + c2;
-        TDA8425_Float r3 = r2 + c2;
-        stereo[TDA8425_Stereo_L] = l3;
-        stereo[TDA8425_Stereo_R] = r3;
+        TDA8425_Float l = stereo[TDA8425_Stereo_L];
+        TDA8425_Float r = stereo[TDA8425_Stereo_R];
+        TDA8425_Float k = ((TDA8425_Float)TDA8425_Spatial_Crosstalk / 100);
+        stereo[TDA8425_Stereo_L] = l + (l - r) * k;
+        stereo[TDA8425_Stereo_R] = r + (r - l) * k;
         break;
     }
     default:

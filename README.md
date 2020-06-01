@@ -107,6 +107,9 @@ resistance values from *curve 1*, which is symmetrical and centered around
 
 The filter as a whole is implemented as a classic *biquad* filter.
 
+The script [TDA8425_pseudo.py](doc/TDA8425_pseudo.py) was used in the
+development, to expand the expressions to calculate the biquad coefficients.
+
 ![Pseudo stereo schematic highlight](doc/TDA8425_pseudo.png)
 
 ![Pseudo stereo phase diagram](doc/pseudo_phase.png)
@@ -115,9 +118,10 @@ The filter as a whole is implemented as a classic *biquad* filter.
 ### Spatial stereo
 
 Looking at the schematic of the datasheet, it looks like the *spatial stereo*
-is simply a common-mode attenuator, to reduce the weight of the *middle*
-channel in an equivalent *mid-side* (*M-S*) model.
+simply adds some cross-talk between the channels.
+The relationthip between generic channels *a* and *b* is the following:
+
+    Voa(t) = Via(t) + Rfa/Rc \* (Via(t) - Vib(t))
 
 ![Spatial stereo schematic highlight](doc/TDA8425_spatial.png)
 
-![Spatial stereo system diagram](doc/stereo_enhancer.png)
