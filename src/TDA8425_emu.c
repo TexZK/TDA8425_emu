@@ -193,7 +193,7 @@ TDA8425_Float TDA8425_RegisterToTreble(TDA8425_Register data)
 
 // ============================================================================
 
-void TDA8425_BiQuadModelFloat_SetupPseudo(
+void TDA8425_BiQuadModel_SetupPseudo(
     TDA8425_BiQuadModelFloat* model,
     TDA8425_Float sample_rate,
     TDA8425_Float pseudo_c1,
@@ -236,7 +236,7 @@ void TDA8425_BiQuadModelFloat_SetupPseudo(
 
 // ----------------------------------------------------------------------------
 
-void TDA8425_BiQuadModelFloat_SetupBass(
+void TDA8425_BiQuadModel_SetupBass(
     TDA8425_BiQuadModelFloat* model,
     TDA8425_Float sample_rate,
     TDA8425_Float bass_gain
@@ -265,7 +265,7 @@ void TDA8425_BiQuadModelFloat_SetupBass(
 
 // ----------------------------------------------------------------------------
 
-void TDA8425_BiQuadModelFloat_SetupTreble(
+void TDA8425_BiQuadModel_SetupTreble(
     TDA8425_BiQuadModelFloat* model,
     TDA8425_Float sample_rate,
     TDA8425_Float treble_gain
@@ -294,7 +294,7 @@ void TDA8425_BiQuadModelFloat_SetupTreble(
 
 // ----------------------------------------------------------------------------
 
-void TDA8425_BiQuadStateFloat_Clear(
+void TDA8425_BiQuadState_Clear(
     TDA8425_BiQuadStateFloat* state,
     TDA8425_Float output
 )
@@ -310,7 +310,7 @@ void TDA8425_BiQuadStateFloat_Clear(
 
 // ----------------------------------------------------------------------------
 
-TDA8425_Float TDA8425_BiQuadFloat_ProcessSample(
+TDA8425_Float TDA8425_BiQuad_Process(
     TDA8425_BiQuadModelFloat* model,
     TDA8425_BiQuadStateFloat* state,
     TDA8425_Float input
@@ -333,76 +333,63 @@ TDA8425_Float TDA8425_BiQuadFloat_ProcessSample(
     return state->y0;
 }
 
-// ----------------------------------------------------------------------------
+// ============================================================================
 
-void TDA8425_BiQuadFloat_ProcessVector(
-    TDA8425_BiQuadModelFloat* model,
-    TDA8425_BiQuadStateFloat* state,
-    TDA8425_Index count,
-    TDA8425_Float const inputs[],
-    TDA8425_Float outputs[]
+void TDA8425_ForcedMono_Process(
+    TDA8425_Float stereo[TDA8425_Stereo_Count]
 )
 {
-    TDA8425_Float x0 = state->x0;
-    TDA8425_Float x1 = state->x1;
-    TDA8425_Float x2 = state->x2;
+    TDA8425_Float m = stereo[TDA8425_Stereo_L] + stereo[TDA8425_Stereo_R];
+    stereo[TDA8425_Stereo_L] = m;
+    stereo[TDA8425_Stereo_R] = m;
+}
 
-    TDA8425_Float y0 = state->y0;
-    TDA8425_Float y1 = state->y1;
-    TDA8425_Float y2 = state->y2;
+// ----------------------------------------------------------------------------
 
-    TDA8425_Float b0 = model->b0;
-    TDA8425_Float b1 = model->b1;
-    TDA8425_Float b2 = model->b2;
+void TDA8425_PseudoStereo_Process(
+    TDA8425_Float stereo[TDA8425_Stereo_Count],
+    TDA8425_BiQuadModelFloat* model,
+    TDA8425_BiQuadStateFloat* state
+)
+{
+    stereo[TDA8425_Stereo_L] = TDA8425_BiQuad_Process(
+        model,
+        state,
+        stereo[TDA8425_Stereo_L]
+    );
+}
 
-    TDA8425_Float a1 = model->a1;
-    TDA8425_Float a2 = model->a2;
+// ----------------------------------------------------------------------------
 
-    while (count--) {
-        x2 = x1;
-        x1 = x0;
-        x0 = *inputs++;
-
-        y2 = y1;
-        y1 = y0;
-
-        y0 = (x0 * b0 +
-              x1 * b1 +
-              x2 * b2
-              +
-              y1 * a1 +
-              y2 * a2);
-
-        *outputs++ = y0;
-    }
-
-    state->x0 = x0;
-    state->x1 = x1;
-    state->x2 = x2;
-
-    state->y0 = y0;
-    state->y1 = y1;
-    state->y2 = y2;
+void TDA8425_SpatialStereo_Process(
+    TDA8425_Float stereo[TDA8425_Stereo_Count]
+)
+{
+    TDA8425_Float l = stereo[TDA8425_Stereo_L];
+    TDA8425_Float r = stereo[TDA8425_Stereo_R];
+    TDA8425_Float const k = ((TDA8425_Float)TDA8425_Spatial_Crosstalk / 100);
+    stereo[TDA8425_Stereo_L] = l + (l - r) * k;
+    stereo[TDA8425_Stereo_R] = r + (r - l) * k;
 }
 
 // ============================================================================
 
-void TDA8425_ChipFloat_Ctor(TDA8425_ChipFloat* self)
+void TDA8425_Chip_Ctor(TDA8425_Chip* self)
 {
     (void)self;
 }
 
 // ----------------------------------------------------------------------------
 
-void TDA8425_ChipFloat_Dtor(TDA8425_ChipFloat* self)
+void TDA8425_Chip_Dtor(TDA8425_Chip* self)
 {
     (void)self;
 }
 
 // ----------------------------------------------------------------------------
 
-void TDA8425_ChipFloat_Setup(
-    TDA8425_ChipFloat* self,
+void TDA8425_Chip_Setup(
+    TDA8425_Chip* self,
     TDA8425_Float sample_rate,
     TDA8425_Float pseudo_c1,
     TDA8425_Float pseudo_c2
@@ -410,135 +397,153 @@ void TDA8425_ChipFloat_Setup(
 {
     self->sample_rate_ = sample_rate;
 
-    TDA8425_BiQuadModelFloat_SetupPseudo(
+    TDA8425_BiQuadModel_SetupPseudo(
         &self->pseudo_model_,
         sample_rate,
         pseudo_c1,
         pseudo_c2
     );
 
-    TDA8425_ChipFloat_Write(self, TDA8425_Reg_BA, self->reg_ba_);
-    TDA8425_ChipFloat_Write(self, TDA8425_Reg_TR, self->reg_tr_);
+    TDA8425_Chip_Write(self, TDA8425_Reg_BA, self->reg_ba_);
+    TDA8425_Chip_Write(self, TDA8425_Reg_TR, self->reg_tr_);
 }
 
 // ----------------------------------------------------------------------------
 
-void TDA8425_ChipFloat_Reset(TDA8425_ChipFloat* self)
+void TDA8425_Chip_Reset(TDA8425_Chip* self)
 {
-    TDA8425_ChipFloat_Write(self, TDA8425_Reg_VL, 0);
-    TDA8425_ChipFloat_Write(self, TDA8425_Reg_VR, 0);
-    TDA8425_ChipFloat_Write(self, TDA8425_Reg_BA, 0);
-    TDA8425_ChipFloat_Write(self, TDA8425_Reg_TR, 0);
-    TDA8425_ChipFloat_Write(self, TDA8425_Reg_SF, 0);
+    TDA8425_Chip_Write(self, TDA8425_Reg_VL, 0);
+    TDA8425_Chip_Write(self, TDA8425_Reg_VR, 0);
+    TDA8425_Chip_Write(self, TDA8425_Reg_BA, 0);
+    TDA8425_Chip_Write(self, TDA8425_Reg_TR, 0);
+    TDA8425_Chip_Write(self, TDA8425_Reg_SF, 0);
 }
 
 // ----------------------------------------------------------------------------
 
-void TDA8425_ChipFloat_Start(TDA8425_ChipFloat* self)
+void TDA8425_Chip_Start(TDA8425_Chip* self)
 {
-    TDA8425_BiQuadStateFloat_Clear(&self->pseudo_state_, 0);
+    TDA8425_BiQuadState_Clear(&self->pseudo_state_, 0);
 
-    for (unsigned i = 0; i < TDA8425_Stereo_Count; ++i) {
-        TDA8425_BiQuadStateFloat_Clear(&self->bass_state_[i], 0);
-        TDA8425_BiQuadStateFloat_Clear(&self->treble_state_[i], 0);
+    for (int i = 0; i < TDA8425_Stereo_Count; ++i) {
+        TDA8425_BiQuadState_Clear(&self->bass_state_[i], 0);
+        TDA8425_BiQuadState_Clear(&self->treble_state_[i], 0);
     }
 }
 
 // ----------------------------------------------------------------------------
 
-void TDA8425_ChipFloat_Stop(TDA8425_ChipFloat* self)
+void TDA8425_Chip_Stop(TDA8425_Chip* self)
 {
     (void)self;
 }
 
 // ----------------------------------------------------------------------------
 
-void TDA8425_ChipFloat_Process(
-    TDA8425_ChipFloat* self,
-    TDA8425_ChipFloat_Process_Data* data
+static void TDA8425_Chip_ProcessSelector(
+    TDA8425_Chip* self,
+    TDA8425_Chip_Process_Data* data,
+    TDA8425_Float stereo[TDA8425_Stereo_Count]
 )
 {
-    TDA8425_Float stereo[TDA8425_Stereo_Count];
+    TDA8425_Source const S1 = TDA8425_Source_1;
+    TDA8425_Source const S2 = TDA8425_Source_2;
+    TDA8425_Stereo const L = TDA8425_Stereo_L;
+    TDA8425_Stereo const R = TDA8425_Stereo_R;
 
     switch (self->selector_)
     {
     case TDA8425_Selector_Sound_A_1:
-        stereo[TDA8425_Stereo_L] = data->inputs[TDA8425_Source_1][TDA8425_Stereo_L];
-        stereo[TDA8425_Stereo_R] = data->inputs[TDA8425_Source_1][TDA8425_Stereo_L];
+        stereo[L] = data->inputs[S1][L];
+        stereo[R] = data->inputs[S1][L];
         break;
 
     case TDA8425_Selector_Sound_A_2:
-        stereo[TDA8425_Stereo_L] = data->inputs[TDA8425_Source_2][TDA8425_Stereo_L];
-        stereo[TDA8425_Stereo_R] = data->inputs[TDA8425_Source_2][TDA8425_Stereo_L];
+        stereo[L] = data->inputs[S2][L];
+        stereo[R] = data->inputs[S2][L];
         break;
 
     case TDA8425_Selector_Sound_B_1:
-        stereo[TDA8425_Stereo_L] = data->inputs[TDA8425_Source_1][TDA8425_Stereo_R];
-        stereo[TDA8425_Stereo_R] = data->inputs[TDA8425_Source_1][TDA8425_Stereo_R];
+        stereo[L] = data->inputs[S1][R];
+        stereo[R] = data->inputs[S1][R];
         break;
 
     case TDA8425_Selector_Sound_B_2:
-        stereo[TDA8425_Stereo_L] = data->inputs[TDA8425_Source_2][TDA8425_Stereo_L];
-        stereo[TDA8425_Stereo_R] = data->inputs[TDA8425_Source_2][TDA8425_Stereo_R];
+        stereo[L] = data->inputs[S2][L];
+        stereo[R] = data->inputs[S2][R];
         break;
 
     case TDA8425_Selector_Stereo_1:
-        stereo[TDA8425_Stereo_L] = data->inputs[TDA8425_Source_1][TDA8425_Stereo_L];
-        stereo[TDA8425_Stereo_R] = data->inputs[TDA8425_Source_1][TDA8425_Stereo_R];
+        stereo[L] = data->inputs[S1][L];
+        stereo[R] = data->inputs[S1][R];
         break;
 
     case TDA8425_Selector_Stereo_2:
-        stereo[TDA8425_Stereo_L] = data->inputs[TDA8425_Source_2][TDA8425_Stereo_L];
-        stereo[TDA8425_Stereo_R] = data->inputs[TDA8425_Source_2][TDA8425_Stereo_R];
+        stereo[L] = data->inputs[S2][L];
+        stereo[R] = data->inputs[S2][R];
         break;
 
     default:
-        data->outputs[TDA8425_Stereo_L] = 0;
-        data->outputs[TDA8425_Stereo_R] = 0;
-        return;
+        break;
     }
+}
 
+// ----------------------------------------------------------------------------
+
+static void TDA8425_Chip_ProcessMode(
+    TDA8425_Chip* self,
+    TDA8425_Float stereo[TDA8425_Stereo_Count]
+)
+{
     switch (self->mode_)
     {
-    case TDA8425_Mode_ForcedMono: {
-        stereo[TDA8425_Stereo_R] = stereo[TDA8425_Stereo_L];
+    case TDA8425_Mode_ForcedMono:
+        TDA8425_ForcedMono_Process(stereo);
         break;
-    }
-    case TDA8425_Mode_LinearStereo: {
+
+    case TDA8425_Mode_LinearStereo:
         break;
-    }
-    case TDA8425_Mode_PseudoStereo: {
-        stereo[TDA8425_Stereo_L] = TDA8425_BiQuadFloat_ProcessSample(
+
+    case TDA8425_Mode_PseudoStereo:
+        TDA8425_PseudoStereo_Process(
+            stereo,
             &self->pseudo_model_,
-            &self->pseudo_state_,
-            stereo[TDA8425_Stereo_L]
+            &self->pseudo_state_
         );
         break;
-    }
-    case TDA8425_Mode_SpatialStereo: {
-        TDA8425_Float l = stereo[TDA8425_Stereo_L];
-        TDA8425_Float r = stereo[TDA8425_Stereo_R];
-        TDA8425_Float k = ((TDA8425_Float)TDA8425_Spatial_Crosstalk / 100);
-        stereo[TDA8425_Stereo_L] = l + (l - r) * k;
-        stereo[TDA8425_Stereo_R] = r + (r - l) * k;
+
+    case TDA8425_Mode_SpatialStereo:
+        TDA8425_SpatialStereo_Process(stereo);
+        break;
+
+    default:
         break;
     }
-    default:
-        data->outputs[TDA8425_Stereo_L] = 0;
-        data->outputs[TDA8425_Stereo_R] = 0;
-        return;
-    }
+}
 
-    for (unsigned channel = 0; channel < TDA8425_Stereo_Count; ++channel) {
+// ----------------------------------------------------------------------------
+
+void TDA8425_Chip_Process(
+    TDA8425_Chip* self,
+    TDA8425_Chip_Process_Data* data
+)
+{
+    TDA8425_Float stereo[TDA8425_Stereo_Count];
+
+    TDA8425_Chip_ProcessSelector(self, data, stereo);
+
+    TDA8425_Chip_ProcessMode(self, stereo);
+
+    for (int channel = 0; channel < TDA8425_Stereo_Count; ++channel) {
         TDA8425_Float sample = self->volume_[channel] * stereo[channel];
 
-        sample = TDA8425_BiQuadFloat_ProcessSample(
+        sample = TDA8425_BiQuad_Process(
             &self->bass_model_,
             &self->bass_state_[channel],
             sample
         );
 
-        sample = TDA8425_BiQuadFloat_ProcessSample(
+        sample = TDA8425_BiQuad_Process(
             &self->treble_model_,
             &self->treble_state_[channel],
             sample
@@ -550,8 +555,8 @@ void TDA8425_ChipFloat_Process(
 
 // ----------------------------------------------------------------------------
 
-TDA8425_Register TDA8425_ChipFloat_Read(
-    TDA8425_ChipFloat const* self,
+TDA8425_Register TDA8425_Chip_Read(
+    TDA8425_Chip const* self,
     TDA8425_Address address
 )
 {
@@ -579,63 +584,65 @@ TDA8425_Register TDA8425_ChipFloat_Read(
 
 // ----------------------------------------------------------------------------
 
-void TDA8425_ChipFloat_Write(
-    TDA8425_ChipFloat* self,
+void TDA8425_Chip_Write(
+    TDA8425_Chip* self,
     TDA8425_Address address,
     TDA8425_Register data
 )
 {
     switch (address)
     {
-    case TDA8425_Reg_VL: {
+    case TDA8425_Reg_VL:
         data |= (TDA8425_Register)~TDA8425_Volume_Data_Mask;
         self->reg_vl_ = data;
 
         self->volume_[TDA8425_Stereo_L] = TDA8425_RegisterToVolume(data);
         break;
-    }
-    case TDA8425_Reg_VR: {
+
+    case TDA8425_Reg_VR:
         data |= (TDA8425_Register)~TDA8425_Volume_Data_Mask;
         self->reg_vr_ = data;
 
         self->volume_[TDA8425_Stereo_R] = TDA8425_RegisterToVolume(data);
         break;
-    }
-    case TDA8425_Reg_BA: {
+
+    case TDA8425_Reg_BA:
         data |= (TDA8425_Register)~TDA8425_Tone_Data_Mask;
         self->reg_ba_ = data;
 
-        TDA8425_BiQuadModelFloat_SetupBass(
+        TDA8425_BiQuadModel_SetupBass(
             &self->bass_model_,
             self->sample_rate_,
             TDA8425_RegisterToBass(data)
         );
         break;
-    }
-    case TDA8425_Reg_TR: {
+
+    case TDA8425_Reg_TR:
         data |= (TDA8425_Register)~TDA8425_Tone_Data_Mask;
         self->reg_tr_ = data;
 
-        TDA8425_BiQuadModelFloat_SetupTreble(
+        TDA8425_BiQuadModel_SetupTreble(
             &self->treble_model_,
             self->sample_rate_,
             TDA8425_RegisterToTreble(data)
         );
         break;
-    }
-    case TDA8425_Reg_SF: {
+
+    case TDA8425_Reg_SF:
         data |= (TDA8425_Register)~TDA8425_Switch_Data_Mask;
         self->reg_sf_ = data;
 
-        TDA8425_Register reg_selector = self->reg_sf_;
-        reg_selector &= (TDA8425_Register)TDA8425_Selector_Mask;
-        self->selector_ = (TDA8425_Selector)reg_selector;
+        self->selector_ = (TDA8425_Selector)(
+            self->reg_sf_
+            & (TDA8425_Register)TDA8425_Selector_Mask
+        );
 
-        TDA8425_Register reg_mode = self->reg_sf_ >> TDA8425_Reg_SF_STL;
-        reg_mode &= (TDA8425_Register)TDA8425_Mode_Mask;
-        self->mode_ = (TDA8425_Mode)reg_mode;
+        self->mode_ = (TDA8425_Mode)(
+            (self->reg_sf_ >> TDA8425_Reg_SF_STL)
+            & (TDA8425_Register)TDA8425_Mode_Mask
+        );
         break;
-    }
+
     default:
         break;
     }

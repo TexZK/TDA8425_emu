@@ -815,19 +815,19 @@ int main(int argc, char const* argv[])
         return 1;
     }
 
-    TDA8425_ChipFloat chip;
-    TDA8425_ChipFloat_Ctor(&chip);
-    TDA8425_ChipFloat_Setup(&chip, rate, pseudo_c1, pseudo_c2);
-    TDA8425_ChipFloat_Reset(&chip);
-    TDA8425_ChipFloat_Write(&chip, TDA8425_Reg_VL, reg_vl);
-    TDA8425_ChipFloat_Write(&chip, TDA8425_Reg_VR, reg_vr);
-    TDA8425_ChipFloat_Write(&chip, TDA8425_Reg_BA, reg_ba);
-    TDA8425_ChipFloat_Write(&chip, TDA8425_Reg_TR, reg_tr);
-    TDA8425_ChipFloat_Write(&chip, TDA8425_Reg_SF, reg_sf);
-    TDA8425_ChipFloat_Start(&chip);
+    TDA8425_Chip chip;
+    TDA8425_Chip_Ctor(&chip);
+    TDA8425_Chip_Setup(&chip, rate, pseudo_c1, pseudo_c2);
+    TDA8425_Chip_Reset(&chip);
+    TDA8425_Chip_Write(&chip, TDA8425_Reg_VL, reg_vl);
+    TDA8425_Chip_Write(&chip, TDA8425_Reg_VR, reg_vr);
+    TDA8425_Chip_Write(&chip, TDA8425_Reg_BA, reg_ba);
+    TDA8425_Chip_Write(&chip, TDA8425_Reg_TR, reg_tr);
+    TDA8425_Chip_Write(&chip, TDA8425_Reg_SF, reg_sf);
+    TDA8425_Chip_Start(&chip);
 
     while (!feof(stdin)) {
-        TDA8425_ChipFloat_Process_Data data;
+        TDA8425_Chip_Process_Data data;
         long channel;
 
         TDA8425_Float* inputs = &data.inputs[0][0];  // overflows
@@ -846,7 +846,7 @@ int main(int argc, char const* argv[])
             inputs[channel] = 0;
         }
 
-        TDA8425_ChipFloat_Process(&chip, &data);
+        TDA8425_Chip_Process(&chip, &data);
 
         for (channel = 0; channel < MAX_OUTPUTS; ++channel) {
             if (!stream_writer(data.outputs[channel])) {
@@ -862,12 +862,12 @@ int main(int argc, char const* argv[])
     }
 
 on_eof_:
-    TDA8425_ChipFloat_Stop(&chip);
-    TDA8425_ChipFloat_Dtor(&chip);
+    TDA8425_Chip_Stop(&chip);
+    TDA8425_Chip_Dtor(&chip);
     return 0;
 
 on_error_:
-    TDA8425_ChipFloat_Stop(&chip);
-    TDA8425_ChipFloat_Dtor(&chip);
+    TDA8425_Chip_Stop(&chip);
+    TDA8425_Chip_Dtor(&chip);
     return 1;
 }

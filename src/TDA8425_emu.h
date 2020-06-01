@@ -43,9 +43,7 @@ extern "C" {
 #endif
 
 #ifndef TDA8425_FLOAT
-#define TDA8425_FLOAT double        //!< Floating point data type
-#define TDA8425_Float_Min   (-1)    //!< Maximum floating point value
-#define TDA8425_Float_Max   (+1)    //!< Minimum floating point value
+#define TDA8425_FLOAT double            //!< Floating point data type
 #endif
 
 // ============================================================================
@@ -198,20 +196,20 @@ typedef struct TDA8425_BiQuadStateFloat
 
 // ----------------------------------------------------------------------------
 
-void TDA8425_BiQuadModelFloat_SetupPseudo(
+void TDA8425_BiQuadModel_SetupPseudo(
     TDA8425_BiQuadModelFloat* model,
     TDA8425_Float sample_rate,
     TDA8425_Float pseudo_c1,
     TDA8425_Float pseudo_c2
 );
 
-void TDA8425_BiQuadModelFloat_SetupBass(
+void TDA8425_BiQuadModel_SetupBass(
     TDA8425_BiQuadModelFloat* model,
     TDA8425_Float sample_rate,
     TDA8425_Float bass_gain
 );
 
-void TDA8425_BiQuadModelFloat_SetupTreble(
+void TDA8425_BiQuadModel_SetupTreble(
     TDA8425_BiQuadModelFloat* model,
     TDA8425_Float sample_rate,
     TDA8425_Float treble_gain
@@ -219,23 +217,37 @@ void TDA8425_BiQuadModelFloat_SetupTreble(
 
 // ----------------------------------------------------------------------------
 
-void TDA8425_BiQuadStateFloat_Clear(
+void TDA8425_BiQuadState_Clear(
     TDA8425_BiQuadStateFloat* state,
     TDA8425_Float output
 );
 
-TDA8425_Float TDA8425_BiQuadFloat_ProcessSample(
+// ----------------------------------------------------------------------------
+
+TDA8425_Float TDA8425_BiQuad_Process(
     TDA8425_BiQuadModelFloat* model,
     TDA8425_BiQuadStateFloat* state,
     TDA8425_Float input
 );
 
-void TDA8425_BiQuadFloat_ProcessVector(
+// ============================================================================
+
+void TDA8425_ForcedMono_Process(
+    TDA8425_Float stereo[TDA8425_Stereo_Count]
+);
+
+// ----------------------------------------------------------------------------
+
+void TDA8425_PseudoStereo_Process(
+    TDA8425_Float stereo[TDA8425_Stereo_Count],
     TDA8425_BiQuadModelFloat* model,
-    TDA8425_BiQuadStateFloat* state,
-    TDA8425_Index count,
-    TDA8425_Float const inputs[],
-    TDA8425_Float outputs[]
+    TDA8425_BiQuadStateFloat* state
+);
+
+// ----------------------------------------------------------------------------
+
+void TDA8425_SpatialStereo_Process(
+    TDA8425_Float stereo[TDA8425_Stereo_Count]
 );
 
 // ============================================================================
@@ -262,45 +274,45 @@ typedef struct TDA8425_ChipFloat
     TDA8425_BiQuadModelFloat treble_model_;
     TDA8425_BiQuadStateFloat treble_state_[TDA8425_Stereo_Count];
 
-} TDA8425_ChipFloat;
+} TDA8425_Chip;
 
-typedef struct TDA8425_ChipFloat_Process_Data
+typedef struct TDA8425_Chip_Process_Data
 {
     TDA8425_Float inputs[TDA8425_Source_Count][TDA8425_Stereo_Count];
     TDA8425_Float outputs[TDA8425_Stereo_Count];
-} TDA8425_ChipFloat_Process_Data;
+} TDA8425_Chip_Process_Data;
 
 // ----------------------------------------------------------------------------
 
-void TDA8425_ChipFloat_Ctor(TDA8425_ChipFloat* self);
+void TDA8425_Chip_Ctor(TDA8425_Chip* self);
 
-void TDA8425_ChipFloat_Dtor(TDA8425_ChipFloat* self);
+void TDA8425_Chip_Dtor(TDA8425_Chip* self);
 
-void TDA8425_ChipFloat_Setup(
-    TDA8425_ChipFloat* self,
+void TDA8425_Chip_Setup(
+    TDA8425_Chip* self,
     TDA8425_Float sample_rate,
     TDA8425_Float pseudo_c1,
     TDA8425_Float pseudo_c2
 );
 
-void TDA8425_ChipFloat_Reset(TDA8425_ChipFloat* self);
+void TDA8425_Chip_Reset(TDA8425_Chip* self);
 
-void TDA8425_ChipFloat_Start(TDA8425_ChipFloat* self);
+void TDA8425_Chip_Start(TDA8425_Chip* self);
 
-void TDA8425_ChipFloat_Stop(TDA8425_ChipFloat* self);
+void TDA8425_Chip_Stop(TDA8425_Chip* self);
 
-void TDA8425_ChipFloat_Process(
-    TDA8425_ChipFloat* self,
-    TDA8425_ChipFloat_Process_Data* data
+void TDA8425_Chip_Process(
+    TDA8425_Chip* self,
+    TDA8425_Chip_Process_Data* data
 );
 
-TDA8425_Register TDA8425_ChipFloat_Read(
-    TDA8425_ChipFloat const* self,
+TDA8425_Register TDA8425_Chip_Read(
+    TDA8425_Chip const* self,
     TDA8425_Address address
 );
 
-void TDA8425_ChipFloat_Write(
-    TDA8425_ChipFloat* self,
+void TDA8425_Chip_Write(
+    TDA8425_Chip* self,
     TDA8425_Address address,
     TDA8425_Register data
 );
