@@ -29,7 +29,7 @@ into your project.
 
 The engine implements the following conceptual flow:
 
-1. Status memory allocation.
+1. Chip memory allocation.
 2. Call **Ctor()** to invalidate internal data.
 3. Call **Setup()** to initialize static settings.
 4. Call **Reset()** to clear emulated registers.
@@ -39,9 +39,12 @@ The engine implements the following conceptual flow:
     1. Call **Process()** for each sample, with appropriate data types.
 8. Call **Stop()** to stop the algorithms.
 9. Call **Dtor()** to deallocate and invalidate internal data.
-10. Status memory deallocation.
+10. Chip memory deallocation.
 
 Register access timings are not emulated.
+
+You can give a look at the [TDA8425_pipe example](example/TDA8425_pipe.c) for
+more details.
 
 _______________________________________________________________________________
 
@@ -72,12 +75,6 @@ I do not have access to *macOS*, but I guess the *Linux* support should fit.
 I chose the path of verbosity for variable declaration, to help debugging fixed
 point math and buffering. Indeed, when compiled for performance, all those
 variable declarations get optimized away easily.
-
-I did not write the code for explicit vectoring, preferring a *KISS* approach
-at this stage of development. Actually I am not satisfied about how the
-*MSVC++* compiler is generating machine code, and I guess that optimizing the
-code for vectoring should improve the performance by some margin, especially
-the parts for parallel 8-tap delay and output oversampling.
 
 
 ### Input selector
