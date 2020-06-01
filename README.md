@@ -157,7 +157,7 @@ The datasheet plots the frequency response diagrams of two filters: the
 
 The *specified* filter is a classic Baxandall-like tone control, with single
 pole/zero shelving filters for both bass and treble controls.
-It looks like the they are centered around 300 Hz and 3000 Hz, respectively.
+It looks like the they are centered around 300 Hz and 4500 Hz, respectively.
 I designed two *biquad* filters around such frequencies, with the help of the
 [TDA8425_shelving.py](doc/TDA8425_shelving.py) Python script.
 

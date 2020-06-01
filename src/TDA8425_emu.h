@@ -146,7 +146,7 @@ enum TDA8425_DatasheetSpecifications {
     TDA8425_Switch_Data_Mask  = (1 << TDA8425_Switch_Data_Bits) - 1,
 
     TDA8425_Bass_Frequency    =  300,  // [Hz]
-    TDA8425_Treble_Frequency  = 3000,  // [Hz]
+    TDA8425_Treble_Frequency  = 4500,  // [Hz]
 
     TDA8425_Pseudo_R1         = 13000,  // [ohm]
     TDA8425_Pseudo_R2         = 13000,  // [ohm]

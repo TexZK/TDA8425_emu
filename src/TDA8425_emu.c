@@ -276,16 +276,16 @@ void TDA8425_BiQuadModel_SetupTreble(
     double k = 0.5 / fs;
     double w = (2 * M_PI) * (double)TDA8425_Treble_Frequency;
 
-    double a0 = ((k * w) * (g * g)) + g;
-    double a1 = ((k * w) * (g * g)) - g;
+    double a0 = ((k * w) * g) + 1;
+    double a1 = ((k * w) * g) - 1;
 
-    double b0 = (k * w) + g;
-    double b1 = (k * w) - g;
+    double b0 = ((k * w) * g) + (g * g);
+    double b1 = ((k * w) * g) - (g * g);
 
     double ra0 = 1 / a0;
 
-    model->b0 = (TDA8425_Float)(b0 * ra0);
-    model->b1 = (TDA8425_Float)(b1 * ra0);
+    model->b0 = (TDA8425_Float)(b0 *  ra0);
+    model->b1 = (TDA8425_Float)(b1 *  ra0);
     model->b2 = 0;
 
     model->a1 = (TDA8425_Float)(a1 * -ra0);
