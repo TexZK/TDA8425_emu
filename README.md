@@ -30,15 +30,15 @@ into your project.
 The engine implements the following conceptual flow:
 
 1. Status memory allocation.
-2. Call *Ctor()* method to invalidate internal data.
-3. Call *Setup()* method to initialize static settings.
-4. Call *Reset()* method to clear emulated registers.
-5. Call *Write()* for each register to inizialize.
-6. Call *Start()* to start the algorithms.
+2. Call **Ctor()** to invalidate internal data.
+3. Call **Setup()** to initialize static settings.
+4. Call **Reset()** to clear emulated registers.
+5. Call **Write()** for each register to inizialize.
+6. Call **Start()** to start the algorithms.
 7. Processing loop:
-    1. Call *Process()* method for each sample, with appropriate data types.
-8. Call *Stop()* method to stop the algorithms.
-9. Call *Dtor()* method to deallocate and invalidate internal data.
+    1. Call **Process()** for each sample, with appropriate data types.
+8. Call **Stop()** to stop the algorithms.
+9. Call **Dtor()** to deallocate and invalidate internal data.
 10. Status memory deallocation.
 
 Register access timings are not emulated.
@@ -53,11 +53,8 @@ details.
 
 ### Language
 
-I chose *C89* with a bit of *C99*. I was going to use *C++20* for my own
-pleasure, but instead I find good old and mature C to be the best for such a
-tiny library. C is also easier to integrate with other languages, and the
-mighty features of a colossal language like C++ are more of a burden than for
-actual use in such case.
+I chose *C99*, because instead I find good old and mature C to be the best for
+such a tiny library. C is also easier to integrate with other languages.
 
 
 ### Cross-platform support
@@ -65,7 +62,7 @@ actual use in such case.
 The code itself should be cross-platform and clean enough not to give
 compilation errors or ambiguity.
 
-Currently the library is developed and tested under *Windows* with *MSVC++ 14*.
+Currently the library is developed and tested under *Windows* with *MSVC++14*.
 Of course, I will at least provide support for *gcc* and *clang* under *Linux*.
 I do not have access to *macOS*, but I guess the *Linux* support should fit.
 
@@ -88,6 +85,28 @@ the parts for parallel 8-tap delay and output oversampling.
 The input selector simply chooses which channels to feed to the internal
 processing units.
 
+The *Process()* method is always provided with two stereo sources.
+
+_______________________________________________________________________________
+
+## Stereo modes
+
+### Forced mono
+
+The *forced mono* mode simply adds the two input channels together, duplicating
+the summed signal.
+
+It looks like there is an error in the datasheet, where a switch on the right
+channel is flipped, leading to some weird path, while it is clear that it would
+simply feed the opamp with the sum of the two channels, just like for the left
+channel:
+
+![Forced mono errata corrige](doc/mono_errata.png)
+
+### Linear stereo
+
+The *linear stereo* mode does not alter the two input channels.
+
 
 ### Pseudo stereo
 
@@ -100,9 +119,9 @@ datasheet.
 
 The datasheet describes the pseudo stereo with a clear schematic.
 By knowning the phase diagram and the associated capacitance values, it is
-possible to calculate the internal resistance values from *curve 1*, which is
-symmetrical and centered around 800 Hz. This leads to internal resistances of
-around 13 kΩ.
+possible to calculate the internal resistance values.
+*Curve 1*, symmetrical and centered around 800 Hz, leads to internal resistance
+values of around 13 kΩ.
 
 The filter as a whole is implemented as a *biquad* filter.
 
@@ -116,11 +135,38 @@ development, to expand the expressions to calculate the biquad coefficients.
 
 ### Spatial stereo
 
-Looking at the schematic of the datasheet, it looks like the *spatial stereo*
-simply adds some cross-talk between the channels.
-The relationthip between generic channels *a* and *b* is the following:
+The *spatial stereo* simply adds some cross-talk between the channels.
+
+The relationship between generic channels *a* and *b* is the following:
 
     Voa(t) = Via(t) + Rfa/Rc * (Via(t) - Vib(t))
 
+where `Rfa/Rc` is 52%.
+
+A simple ideal circuit is emulated in the *SPICE* model:
+[TDA8425_spatial.asc](doc/TDA8425_spatial.asc).
+
 ![Spatial stereo schematic highlight](doc/TDA8425_spatial.png)
 
+_______________________________________________________________________________
+
+## Tone control
+
+The datasheet plots the frequency response diagrams of two filter: the
+*specified* one, and the mysterious (at least for me) *T-filter*.
+
+The *specified* filter is a classic Baxandall-like tone control, with single
+pole/zero shelving filters for both bass and treble controls.
+It looks like the they are centered around 300 Hz and 3000 Hz, respectively.
+I designed two *biquad* filters around such frequencies, with the help of the
+[TDA8425_shelving.py](doc/TDA8425_shelving.py) Python script.
+
+I chose full biquad for both filters, to maintain separation of concerns,
+despite a few added useless computations (*a2* and *b2* are unused).
+Furthermore, it looks like the *T-filter* has a second-order frequency response
+for bass control, which can be factored into the bass biquad itself.
+I have some ideas about how to design such a bass shelving filter with
+resonance around 40 Hz, but for now I will stick to the simpler *specified*
+design.
+
+![Tone control frequen response](doc/tone_control.png)
