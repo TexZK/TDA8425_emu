@@ -53,8 +53,8 @@ details.
 
 ### Language
 
-I chose *C99*, because instead I find good old and mature C to be the best for
-such a tiny library. C is also easier to integrate with other languages.
+I chose *C99*, because I find good old and mature C to be the best for such a
+tiny library. C is also easier to integrate with other languages.
 
 
 ### Cross-platform support
@@ -152,7 +152,7 @@ _______________________________________________________________________________
 
 ## Tone control
 
-The datasheet plots the frequency response diagrams of two filter: the
+The datasheet plots the frequency response diagrams of two filters: the
 *specified* one, and the mysterious (at least for me) *T-filter*.
 
 The *specified* filter is a classic Baxandall-like tone control, with single
@@ -170,3 +170,15 @@ resonance around 40 Hz, but for now I will stick to the simpler *specified*
 design.
 
 ![Tone control frequen response](doc/tone_control.png)
+
+_______________________________________________________________________________
+
+## TDA8425_pipe example
+
+This repository provides a fully-featured example. It is a stream processor, in
+that it processes sample data coming from *standard input*, elaborates it, and
+generates outputs on the *standard output*.
+
+Please refer to its own help page, by calling the canonical
+`TDA8425_pipe --help`, or reading it embedded in
+[its source code](example/TDA8425_pipe.c).
