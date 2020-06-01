@@ -120,13 +120,13 @@ datasheet.
 The datasheet describes the pseudo stereo with a clear schematic.
 By knowning the phase diagram and the associated capacitance values, it is
 possible to calculate the internal resistance values.
-*Curve 1*, symmetrical and centered around 800 Hz, leads to internal resistance
-values of around 13 kΩ.
-
-The filter as a whole is implemented as a *biquad* filter.
-
 The script [TDA8425_pseudo.py](doc/TDA8425_pseudo.py) was used in the
 development, to expand the expressions to calculate the biquad coefficients.
+It also helped in the identification of internal resistance values, which
+should be around 15 kΩ, but it looks like the plots on the datasheet are not as
+accurate as those of the script.
+
+The filter as a whole is implemented as a *biquad* filter.
 
 ![Pseudo stereo schematic highlight](doc/TDA8425_pseudo.png)
 

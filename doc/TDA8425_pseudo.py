@@ -1,10 +1,16 @@
 # -*- coding: utf-8 -*-
-import numpy as np
 import matplotlib.pyplot as plt
-# import sounddevice as sd
-# import soundfile as sf
+import numpy as np
 from IPython.display import display
-from sympy import *
+from scipy.signal import freqz
+from sympy import init_printing
+from sympy import symbols
+from sympy import simplify
+from sympy import collect
+from sympy import expand
+from sympy import numer
+from sympy import denom
+from sympy import Poly
 
 
 def spprint(name, symbol, plain=False):
@@ -53,88 +59,52 @@ spprint('H(z) numer coeffs:', b, plain=True)
 for i, x in enumerate(b):
     print(f'b{i}: {x}')
 
-
 #%%
 
+caps = [
+    (15e-9, 15e-9),
+    (5.6e-9, 47e-9),
+    (5.6e-9, 68e-9),
+]
 Fs = 48000
-D = 3  # [s]
+r1 = 15000
+r2 = 15000
 dtype = np.float64
-# dtype = np.float32
 
-# x, Fs = sf.read(r'E:\Downloads\doom.wav', dtype=stype.__name__)
-# x = x[:Fs*D]
+f = np.logspace(np.log10(10), np.log10(20000))
+fig, ax1 = plt.subplots()
+plt.title(f'R1={r1} & R2={r2}')
+plt.xscale('log')
+plt.xlabel('frequency [Hz]')
 
+ax1.set_xlim(10**1, 10**5)
+ax1.set_ylim(-20, 20)
+ax1.set_ylabel('gain [dB]', color='b')
+ax1.grid(True, which='both')
 
-values = {
-    C1: 15e-9,
-#    C1: 5.6e-9,
-#    C1: 5.6e-9,
-    R1: 13e3,
+ax2 = ax1.twinx()
+ax2.set_ylim(-400, 0)
+ax2.set_ylabel('phase [°]', color='g')
+ax2.grid(True, which='both')
 
-    C2: 15e-9,
-#    C2: 47e-9,
-#    C2: 68e-9,
-    R2: 13e3,
+for i, (c1, c2) in enumerate(caps):
+    values = {
+        'C1': c1,
+        'C2': c2,
+        'R1': r1,
+        'R2': r2,
+        'k': 0.5 / Fs,
+    }
 
-    T: 1 / Fs,
-    k: 0.5 / Fs,
-}
+    ak = np.array([x.subs(values) for x in a], dtype=dtype)
+    bk = np.array([x.subs(values) for x in b], dtype=dtype)
+    x, y = freqz(bk, a=ak, worN=f, fs=Fs)
 
-f1 = 1/(2*pi*values[R1]*values[C1])
-f2 = 1/(2*pi*values[R2]*values[C2])
+    # mags = 20*np.log10(np.abs(y))
+    # ax1.plot(x, mags)
 
-t = np.linspace(0, D, D*Fs, dtype=dtype)
-f = dtype(dtype(f1)*.1)
-x = np.sin((2*np.pi*f)*t, dtype=dtype) / f**.5
+    angles = np.unwrap(np.angle(y)) * (180/np.pi)
+    ax2.plot(x, angles, label=f'{i+1}')
 
-xz, yz, z = symbols('x y z')
-
-yz = 1/(z**0 * a[0]) * (yz * z**-1 * -a[1] +
-                        yz * z**-2 * -a[2] +
-                        xz * z**-0 *  b[0] +
-                        xz * z**-1 *  b[1] +
-                        xz * z**-2 *  b[2])
-spprint('y(z):', yz)
-
-yzv = yz.subs(values)
-spprint('y(z):', yzv)
-
-
-#%%
-
-av = np.array([dtype(v.subs(values)) for v in a], dtype=dtype)
-bv = np.array([dtype(v.subs(values)) for v in b], dtype=dtype)
-c = dtype(1/av[0]) * np.array([-av[1], -av[2], bv[0], bv[1], bv[2]], dtype=dtype)
-
-dtype = np.float32
-c = np.array(c, dtype=dtype)
-c0, c1, c2, c3, c4 = c
-
-t = np.linspace(0, len(x), len(x), dtype=dtype)
-
-y = np.zeros_like(x, dtype=dtype)
-
-for ti in range(2, len(t)):
-    y[ti] = (y[ti-1]*c0 + y[ti-2]*c1) + (x[ti]*c2 + x[ti-1]*c3 + x[ti-2]*c4)
-
-#%%
-
-plt.figure()
-plt.grid(1)
-plt.plot(t, x)
-plt.plot(t, y)
-
-# plt.plot(t, y2)
-# plt.grid(1); plt.plot(t, np.log2(np.abs(y2-y)))
-
-
-#%%
-
-# x_y = np.empty((x.size + y.size,), dtype=x.dtype)
-# x_y[0::2] = x
-# x_y[1::2] = y
-# x_y = np.vstack((x, x)).T
-x_y = np.vstack((x, y)).T
-
-# sd.play(x_y, samplerate=Fs, loop=False, blocking=False)
-# sd.stop()
+plt.legend()
+plt.show()

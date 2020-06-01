@@ -11,7 +11,6 @@ from sympy import expand
 from sympy import numer
 from sympy import denom
 from sympy import Poly
-from sympy import pi
 
 
 def spprint(name, symbol, plain=False):
@@ -81,8 +80,7 @@ ax1.set_ylabel('gain [dB]', color='b')
 ax1.grid(True, which='both')
 
 ax2 = ax1.twinx()
-ax2.set_ylim(-180, 180)
-ax2.set_ylabel('angle [°]', color='g')
+ax2.set_ylabel('phase [°]', color='g')
 
 for db in dbs:
     values = {
