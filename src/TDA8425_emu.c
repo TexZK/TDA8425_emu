@@ -508,7 +508,6 @@ void TDA8425_ChipFloat_Process(
         break;
     }
     case TDA8425_Mode_PseudoStereo: {
-        stereo[TDA8425_Stereo_R] = stereo[TDA8425_Stereo_L];
         stereo[TDA8425_Stereo_L] = TDA8425_BiQuadFloat_ProcessSample(
             &self->pseudo_model_,
             &self->pseudo_state_,

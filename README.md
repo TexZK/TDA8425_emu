@@ -91,21 +91,20 @@ processing units.
 
 ### Pseudo stereo
 
-The *pseudo stereo* mode duplicates the input left channel, keeping the fake
-right channel as-is, and applying a two-fold all-pass filter to the fake left
+The *pseudo stereo* mode applies two cascaded all-pass filters to the left
 channel.
 
 All-pass filters can be configured by changing the external capacitance, as per
 an actual chip. The library provides the three preset values mentioned in the
 datasheet.
 
-The datasheet describes the pseudo stereo as two cascaded classic all-pass
-filter stages, with a clear schematic. By knowning the phase diagram and the
-associated capacitance values, it is possible to calculate the internal
-resistance values from *curve 1*, which is symmetrical and centered around
-800 Hz. This leads to internal resistances of around 13 kΩ.
+The datasheet describes the pseudo stereo with a clear schematic.
+By knowning the phase diagram and the associated capacitance values, it is
+possible to calculate the internal resistance values from *curve 1*, which is
+symmetrical and centered around 800 Hz. This leads to internal resistances of
+around 13 kΩ.
 
-The filter as a whole is implemented as a classic *biquad* filter.
+The filter as a whole is implemented as a *biquad* filter.
 
 The script [TDA8425_pseudo.py](doc/TDA8425_pseudo.py) was used in the
 development, to expand the expressions to calculate the biquad coefficients.
@@ -121,7 +120,7 @@ Looking at the schematic of the datasheet, it looks like the *spatial stereo*
 simply adds some cross-talk between the channels.
 The relationthip between generic channels *a* and *b* is the following:
 
-    Voa(t) = Via(t) + Rfa/Rc \* (Via(t) - Vib(t))
+    Voa(t) = Via(t) + Rfa/Rc * (Via(t) - Vib(t))
 
 ![Spatial stereo schematic highlight](doc/TDA8425_spatial.png)
 
