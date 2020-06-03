@@ -335,6 +335,95 @@ TDA8425_Float TDA8425_BiQuad_Process(
 
 // ============================================================================
 
+void TDA8425_BiLinModel_SetupBass(
+    TDA8425_BiLinModelFloat* model,
+    TDA8425_Float sample_rate,
+    TDA8425_Float bass_gain
+)
+{
+    double g = sqrt(bass_gain);
+    double fs = sample_rate;
+    double k = 0.5 / fs;
+    double w = (2 * M_PI) * (double)TDA8425_Bass_Frequency;
+
+    double a0 = (k * w) + g;
+    double a1 = (k * w) - g;
+
+    double b0 = ((k * w) * (g * g)) + g;
+    double b1 = ((k * w) * (g * g)) - g;
+
+    double ra0 = 1 / a0;
+
+    model->b0 = (TDA8425_Float)(b0 * ra0);
+    model->b1 = (TDA8425_Float)(b1 * ra0);
+
+    model->a1 = (TDA8425_Float)(a1 * -ra0);
+}
+
+// ----------------------------------------------------------------------------
+
+void TDA8425_BiLinModel_SetupTreble(
+    TDA8425_BiLinModelFloat* model,
+    TDA8425_Float sample_rate,
+    TDA8425_Float treble_gain
+)
+{
+    double g = sqrt(treble_gain);
+    double fs = sample_rate;
+    double k = 0.5 / fs;
+    double w = (2 * M_PI) * (double)TDA8425_Treble_Frequency;
+
+    double a0 = ((k * w) * g) + 1;
+    double a1 = ((k * w) * g) - 1;
+
+    double b0 = ((k * w) * g) + (g * g);
+    double b1 = ((k * w) * g) - (g * g);
+
+    double ra0 = 1 / a0;
+
+    model->b0 = (TDA8425_Float)(b0 * ra0);
+    model->b1 = (TDA8425_Float)(b1 * ra0);
+
+    model->a1 = (TDA8425_Float)(a1 * -ra0);
+}
+
+// ----------------------------------------------------------------------------
+
+void TDA8425_BiLinState_Clear(
+    TDA8425_BiLinStateFloat* state,
+    TDA8425_Float output
+)
+{
+    state->x0 = 0;
+    state->x1 = 0;
+
+    state->y0 = output;
+    state->y1 = output;
+}
+
+// ----------------------------------------------------------------------------
+
+TDA8425_Float TDA8425_BiLin_Process(
+    TDA8425_BiLinModelFloat* model,
+    TDA8425_BiLinStateFloat* state,
+    TDA8425_Float input
+)
+{
+    state->x1 = state->x0;
+    state->x0 = input;
+
+    state->y1 = state->y0;
+
+    state->y0 = (state->x0 * model->b0 +
+                 state->x1 * model->b1 +
+                 +
+                 state->y1 * model->a1);
+
+    return state->y0;
+}
+
+// ============================================================================
+
 void TDA8425_ForcedMono_Process(
     TDA8425_Float stereo[TDA8425_Stereo_Count]
 )
@@ -426,8 +515,8 @@ void TDA8425_Chip_Start(TDA8425_Chip* self)
     TDA8425_BiQuadState_Clear(&self->pseudo_state_, 0);
 
     for (int i = 0; i < TDA8425_Stereo_Count; ++i) {
-        TDA8425_BiQuadState_Clear(&self->bass_state_[i], 0);
-        TDA8425_BiQuadState_Clear(&self->treble_state_[i], 0);
+        TDA8425_BiLinState_Clear(&self->bass_state_[i], 0);
+        TDA8425_BiLinState_Clear(&self->treble_state_[i], 0);
     }
 }
 
@@ -537,13 +626,13 @@ void TDA8425_Chip_Process(
     for (int channel = 0; channel < TDA8425_Stereo_Count; ++channel) {
         TDA8425_Float sample = self->volume_[channel] * stereo[channel];
 
-        sample = TDA8425_BiQuad_Process(
+        sample = TDA8425_BiLin_Process(
             &self->bass_model_,
             &self->bass_state_[channel],
             sample
         );
 
-        sample = TDA8425_BiQuad_Process(
+        sample = TDA8425_BiLin_Process(
             &self->treble_model_,
             &self->treble_state_[channel],
             sample
@@ -610,7 +699,7 @@ void TDA8425_Chip_Write(
         data |= (TDA8425_Register)~TDA8425_Tone_Data_Mask;
         self->reg_ba_ = data;
 
-        TDA8425_BiQuadModel_SetupBass(
+        TDA8425_BiLinModel_SetupBass(
             &self->bass_model_,
             self->sample_rate_,
             TDA8425_RegisterToBass(data)
@@ -621,7 +710,7 @@ void TDA8425_Chip_Write(
         data |= (TDA8425_Register)~TDA8425_Tone_Data_Mask;
         self->reg_tr_ = data;
 
-        TDA8425_BiQuadModel_SetupTreble(
+        TDA8425_BiLinModel_SetupTreble(
             &self->treble_model_,
             self->sample_rate_,
             TDA8425_RegisterToTreble(data)

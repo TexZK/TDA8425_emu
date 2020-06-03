@@ -158,10 +158,12 @@ It looks like the they are centered around 300 Hz and 4500 Hz, respectively.
 I designed two *biquad* filters around such frequencies, with the help of the
 [TDA8425_shelving.py](doc/TDA8425_shelving.py) Python script.
 
-I chose full biquad for both filters, to maintain separation of concerns,
-despite a few added useless computations (*a2* and *b2* are unused).
-Furthermore, it looks like the *T-filter* has a second-order frequency response
-for bass control, which can be factored into the bass biquad itself.
+I chose *bi-linear* instead of *bi-quadratic* for both filters, to maintain
+separation of concerns.
+
+Furthermore, it looks like the *T-filter* has an additional second-order
+frequency response for bass control, which can be factored into a dedicated
+biquad filter.
 I have some ideas about how to design such a bass shelving filter with
 resonance around 40 Hz, but for now I will stick to the simpler *specified*
 design.

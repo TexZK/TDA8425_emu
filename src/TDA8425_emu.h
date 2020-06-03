@@ -232,6 +232,56 @@ TDA8425_Float TDA8425_BiQuad_Process(
 
 // ============================================================================
 
+//! Bi-Lin model
+typedef struct TDA8425_BiLinModelFloat
+{
+    TDA8425_Float b0;
+    TDA8425_Float b1;
+
+    TDA8425_Float a1;
+} TDA8425_BiLinModelFloat;
+
+//! Bi-Lin state variables
+typedef struct TDA8425_BiLinStateFloat
+{
+    TDA8425_Float x0;
+    TDA8425_Float x1;
+
+    TDA8425_Float y0;
+    TDA8425_Float y1;
+} TDA8425_BiLinStateFloat;
+
+// ----------------------------------------------------------------------------
+
+void TDA8425_BiLinModel_SetupBass(
+    TDA8425_BiLinModelFloat* model,
+    TDA8425_Float sample_rate,
+    TDA8425_Float bass_gain
+);
+
+void TDA8425_BiLinModel_SetupTreble(
+    TDA8425_BiLinModelFloat* model,
+    TDA8425_Float sample_rate,
+    TDA8425_Float treble_gain
+);
+
+// ----------------------------------------------------------------------------
+
+void TDA8425_BiLinState_Clear(
+    TDA8425_BiLinStateFloat* state,
+    TDA8425_Float output
+);
+
+// ----------------------------------------------------------------------------
+
+TDA8425_Float TDA8425_BiLin_Process(
+    TDA8425_BiLinModelFloat* model,
+    TDA8425_BiLinStateFloat* state,
+    TDA8425_Float input
+);
+
+// ============================================================================
+
 void TDA8425_ForcedMono_Process(
     TDA8425_Float stereo[TDA8425_Stereo_Count]
 );
@@ -268,11 +318,11 @@ typedef struct TDA8425_ChipFloat
     TDA8425_BiQuadModelFloat pseudo_model_;
     TDA8425_BiQuadStateFloat pseudo_state_;
 
-    TDA8425_BiQuadModelFloat bass_model_;
-    TDA8425_BiQuadStateFloat bass_state_[TDA8425_Stereo_Count];
+    TDA8425_BiLinModelFloat bass_model_;
+    TDA8425_BiLinStateFloat bass_state_[TDA8425_Stereo_Count];
 
-    TDA8425_BiQuadModelFloat treble_model_;
-    TDA8425_BiQuadStateFloat treble_state_[TDA8425_Stereo_Count];
+    TDA8425_BiLinModelFloat treble_model_;
+    TDA8425_BiLinStateFloat treble_state_[TDA8425_Stereo_Count];
 
 } TDA8425_Chip;
 
