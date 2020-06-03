@@ -194,7 +194,7 @@ TDA8425_Float TDA8425_RegisterToTreble(TDA8425_Register data)
 // ============================================================================
 
 void TDA8425_BiQuadModel_SetupPseudo(
-    TDA8425_BiQuadModelFloat* model,
+    TDA8425_BiQuadModel* model,
     TDA8425_Float sample_rate,
     TDA8425_Float pseudo_c1,
     TDA8425_Float pseudo_c2
@@ -237,7 +237,7 @@ void TDA8425_BiQuadModel_SetupPseudo(
 // ----------------------------------------------------------------------------
 
 void TDA8425_BiQuadModel_SetupBass(
-    TDA8425_BiQuadModelFloat* model,
+    TDA8425_BiQuadModel* model,
     TDA8425_Float sample_rate,
     TDA8425_Float bass_gain
 )
@@ -266,7 +266,7 @@ void TDA8425_BiQuadModel_SetupBass(
 // ----------------------------------------------------------------------------
 
 void TDA8425_BiQuadModel_SetupTreble(
-    TDA8425_BiQuadModelFloat* model,
+    TDA8425_BiQuadModel* model,
     TDA8425_Float sample_rate,
     TDA8425_Float treble_gain
 )
@@ -295,7 +295,7 @@ void TDA8425_BiQuadModel_SetupTreble(
 // ----------------------------------------------------------------------------
 
 void TDA8425_BiQuadState_Clear(
-    TDA8425_BiQuadStateFloat* state,
+    TDA8425_BiQuadState* state,
     TDA8425_Float output
 )
 {
@@ -311,8 +311,8 @@ void TDA8425_BiQuadState_Clear(
 // ----------------------------------------------------------------------------
 
 TDA8425_Float TDA8425_BiQuad_Process(
-    TDA8425_BiQuadModelFloat* model,
-    TDA8425_BiQuadStateFloat* state,
+    TDA8425_BiQuadModel* model,
+    TDA8425_BiQuadState* state,
     TDA8425_Float input
 )
 {
@@ -336,7 +336,7 @@ TDA8425_Float TDA8425_BiQuad_Process(
 // ============================================================================
 
 void TDA8425_BiLinModel_SetupBass(
-    TDA8425_BiLinModelFloat* model,
+    TDA8425_BiLinModel* model,
     TDA8425_Float sample_rate,
     TDA8425_Float bass_gain
 )
@@ -363,7 +363,7 @@ void TDA8425_BiLinModel_SetupBass(
 // ----------------------------------------------------------------------------
 
 void TDA8425_BiLinModel_SetupTreble(
-    TDA8425_BiLinModelFloat* model,
+    TDA8425_BiLinModel* model,
     TDA8425_Float sample_rate,
     TDA8425_Float treble_gain
 )
@@ -390,7 +390,7 @@ void TDA8425_BiLinModel_SetupTreble(
 // ----------------------------------------------------------------------------
 
 void TDA8425_BiLinState_Clear(
-    TDA8425_BiLinStateFloat* state,
+    TDA8425_BiLinState* state,
     TDA8425_Float output
 )
 {
@@ -404,8 +404,8 @@ void TDA8425_BiLinState_Clear(
 // ----------------------------------------------------------------------------
 
 TDA8425_Float TDA8425_BiLin_Process(
-    TDA8425_BiLinModelFloat* model,
-    TDA8425_BiLinStateFloat* state,
+    TDA8425_BiLinModel* model,
+    TDA8425_BiLinState* state,
     TDA8425_Float input
 )
 {
@@ -437,8 +437,8 @@ void TDA8425_ForcedMono_Process(
 
 void TDA8425_PseudoStereo_Process(
     TDA8425_Float stereo[TDA8425_Stereo_Count],
-    TDA8425_BiQuadModelFloat* model,
-    TDA8425_BiQuadStateFloat* state
+    TDA8425_BiQuadModel* model,
+    TDA8425_BiQuadState* state
 )
 {
     stereo[TDA8425_Stereo_L] = TDA8425_BiQuad_Process(
