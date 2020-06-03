@@ -415,7 +415,7 @@ TDA8425_Float TDA8425_BiLin_Process(
     state->y1 = state->y0;
 
     state->y0 = (state->x0 * model->b0 +
-                 state->x1 * model->b1 +
+                 state->x1 * model->b1
                  +
                  state->y1 * model->a1);
 
