@@ -13,6 +13,7 @@ from sympy import denom
 from sympy import Poly
 from sympy import sqrt
 from sympy.codegen.cfunctions import log10
+from sympy import Abs as sabs
 from sympy import cos
 from sympy import sin
 from sympy import pi
@@ -37,23 +38,26 @@ init_printing(use_latex='mathjax')
 
 s, z, w, g, k, wb, wt = symbols('s z w g k wb wt')
 
-D = sqrt(2)
-M = 0.8
+# D = sqrt(2)
+# M = 0.8
 # p1 = -w/g*D + 1j*w/g*D - 1j*w*(1/g-1)*D*M
 # p2 = -w/g*D - 1j*w/g*D + 1j*w*(1/g-1)*D*M
 # z1 = -w*g*D + 1j*w*g*D - 1j*w*(g-1)*D*M
 # z2 = -w*g*D - 1j*w*g*D + 1j*w*(g-1)*D*M
 
-gn = (20*log10(g)) * pi/80
-r = sqrt(1/sqrt((20*log10(g))**2))
-p1 = r*w * (cos(pi*3/4-(gn)) + 1j*sin(pi*3/4-(gn)))
-p2 = r*w * (cos(pi*3/4-(gn)) - 1j*sin(pi*3/4-(gn)))
-z1 = r*w * (cos(pi*3/4+(gn)) + 1j*sin(pi*3/4+(gn)))
-z2 = r*w * (cos(pi*3/4+(gn)) - 1j*sin(pi*3/4+(gn)))
+r = sqrt(1/sabs(20*log10(g)))
+gn = log10(g)*0.85
+ph = pi*(3/4)
+p1 = r*w * (cos(ph-gn) + 1j*sin(ph-gn))
+p2 = r*w * (cos(ph-gn) - 1j*sin(ph-gn))
+z1 = r*w * (cos(ph+gn) + 1j*sin(ph+gn))
+z2 = r*w * (cos(ph+gn) - 1j*sin(ph+gn))
 
-Hs = ((s - z1) * (s - z2)) / ((s - p1) * (s - p2))
-Hs = Hs * (s + wb*g) / (s + wb/g)###XXX DEBUG
-Hs = Hs * g*g * (s + wt/g) / (s + wt*g)###XXX DEBUG
+Hs = 1
+Hs = Hs * ((s - z1) * (s - z2)) / ((s - p1) * (s - p2))  # resonance
+Hs = Hs * s / (s + 2*pi*12)  # DC removal
+Hs = Hs * (s + wb*g) / (s + wb/g)  # basic bass
+Hs = Hs * g*g * (s + wt/g) / (s + wt*g)  # basic treble
 spprint('H(s):', Hs)
 
 Hz = Hs.subs(s, (1/k * (z - 1) / (z + 1)))
@@ -78,11 +82,11 @@ spprint('H(z) numer coeffs:', b, plain=True)
 for i, x in enumerate(b):
     print(f'b{i}: {x}')
 
-#% %
+#%%
 
 dbs = list(range(-12, 15 + 1, 3))
 Fs = 48000
-Fc = 200
+Fc = 180
 dtype = np.float64
 
 plt.close('all')

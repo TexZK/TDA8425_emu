@@ -354,8 +354,8 @@ void TDA8425_BiLinModel_SetupBass(
 
     double ra0 = 1 / a0;
 
-    model->b0 = (TDA8425_Float)(b0 * ra0);
-    model->b1 = (TDA8425_Float)(b1 * ra0);
+    model->b0 = (TDA8425_Float)(b0 *  ra0);
+    model->b1 = (TDA8425_Float)(b1 *  ra0);
 
     model->a1 = (TDA8425_Float)(a1 * -ra0);
 }
@@ -381,8 +381,8 @@ void TDA8425_BiLinModel_SetupTreble(
 
     double ra0 = 1 / a0;
 
-    model->b0 = (TDA8425_Float)(b0 * ra0);
-    model->b1 = (TDA8425_Float)(b1 * ra0);
+    model->b0 = (TDA8425_Float)(b0 *  ra0);
+    model->b1 = (TDA8425_Float)(b1 *  ra0);
 
     model->a1 = (TDA8425_Float)(a1 * -ra0);
 }
