@@ -307,7 +307,7 @@ void TDA8425_BiQuadModel_SetupTfilter(
 
     double log10_g = log10(g);
     double ang = log10_g * 0.85;
-    double abs_sqrt_log10_g = fabs(sqrt(log10_g));
+    double abs_sqrt_log10_g = sqrt(fabs(log10_g));
     double abs2_sqrt_log10_g = abs_sqrt_log10_g * abs_sqrt_log10_g;
     double kw = k * w;
     double m_k2w2 = (kw * kw) * -0.05;
