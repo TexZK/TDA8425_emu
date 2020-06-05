@@ -108,7 +108,7 @@ OPTION (evaluated as per command line argument order):\n\
     See SELECTOR table.\n\
 \n\
 --t-filter\n\
-    Enables T-filter\n\
+    Enables T-filter.\n\
 \n\
 -t, --treble DECIBEL_TREBLE\n\
     Treble gain [dB]; default: 0.\n\
