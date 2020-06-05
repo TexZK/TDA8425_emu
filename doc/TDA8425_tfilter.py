@@ -90,11 +90,11 @@ Fc = 180
 dtype = np.float64
 
 plt.close('all')
-plt.xlabel('Re')
-plt.xlabel('Im')
+plt.xlabel('Re [rad/s]')
+plt.ylabel('Im [rad/s]')
 plt.grid(True)
-plt.plot([-1000, 0], [+1000, 0], color='k')
-plt.plot([-1000, 0], [-1000, 0], color='k')
+plt.plot([-1000, +1000], [+1000, -1000], color='k')
+plt.plot([-1000, +1000], [-1000, +1000], color='k')
 
 for db in dbs:
     values = {
@@ -102,7 +102,7 @@ for db in dbs:
         'wb': 2*np.pi * 300,
         'wt': 2*np.pi * 4500,
         'k': 0.5 / Fs,
-        'g': 10**(db / (20 * 4)),
+        'g': np.sqrt(10**(db / 20)),
     }
 
     pc1 = complex(p1.subs(values))
@@ -122,6 +122,7 @@ plt.show()
 f = np.logspace(np.log10(20), np.log10(20000), 1000)
 # plt.close('all')
 fig, ax1 = plt.subplots()
+plt.title('T-filter resonance')
 plt.xscale('log')
 plt.xlabel('frequency [Hz]')
 
@@ -131,6 +132,7 @@ ax1.set_ylabel('gain [dB]', color='b')
 ax1.grid(True, which='both')
 
 ax2 = ax1.twinx()
+ax2.set_ylim(-60, 60)
 ax2.set_ylabel('phase [°]', color='g')
 
 for db in dbs:

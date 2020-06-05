@@ -73,7 +73,7 @@ dtype = np.float64
 
 f = np.logspace(np.log10(10), np.log10(20000))
 fig, ax1 = plt.subplots()
-plt.title(f'R1={r1} & R2={r2}')
+plt.title(f'Pseudo-stereo: R1 {r1} Ω & R2 {r2} Ω')
 plt.xscale('log')
 plt.xlabel('frequency [Hz]')
 

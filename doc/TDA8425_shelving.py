@@ -71,6 +71,7 @@ dtype = np.float64
 
 f = np.logspace(np.log10(20), np.log10(20000))
 fig, ax1 = plt.subplots()
+plt.title('Tone control')
 plt.xscale('log')
 plt.xlabel('frequency [Hz]')
 
@@ -80,6 +81,7 @@ ax1.set_ylabel('gain [dB]', color='b')
 ax1.grid(True, which='both')
 
 ax2 = ax1.twinx()
+ax2.set_ylim(-90, 90)
 ax2.set_ylabel('phase [°]', color='g')
 
 for db in dbs:
