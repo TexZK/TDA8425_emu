@@ -320,15 +320,25 @@ void TDA8425_BiQuadModel_SetupTfilter(
 
     double a1 = (m_k2w2 + abs2_sqrt_log10_g) * 2;
 
+    double a2 = ((m_k2w2 - abs2_sqrt_log10_g) -
+                 (h_sqrt_5_kw_abs_sqrt_log10_g * cos(ang - ph)));
+
     double b0 = ((m_k2w2 - abs2_sqrt_log10_g) +
                  (h_sqrt_5_kw_abs_sqrt_log10_g * cos(ang + ph)));
 
-    model->b0 = (TDA8425_Float)(b0 / a0);
-    model->b1 = (TDA8425_Float)(a1 / a0);
-    model->b2 = model->b0;
+    double b1 = a1;
 
-    model->a1 = -model->b1;
-    model->a2 = -1;
+    double b2 = ((m_k2w2 - abs2_sqrt_log10_g) -
+                (h_sqrt_5_kw_abs_sqrt_log10_g * cos(ang + ph)));
+
+    double ra0 = 1 / a0;
+
+    model->b0 = (TDA8425_Float)(b0 * ra0);
+    model->b1 = (TDA8425_Float)(b1 * ra0);
+    model->b2 = (TDA8425_Float)(b2 * ra0);
+
+    model->a1 = (TDA8425_Float)(a1 * -ra0);
+    model->a2 = (TDA8425_Float)(a2 * -ra0);
 }
 
 // ----------------------------------------------------------------------------
