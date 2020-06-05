@@ -38,12 +38,12 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 extern "C" {
 #endif
 
-#ifndef TDA8425_INLINE
-#define TDA8425_INLINE static inline
-#endif
-
 #ifndef TDA8425_FLOAT
 #define TDA8425_FLOAT double            //!< Floating point data type
+#endif
+
+#ifndef TDA8425_USE_TFILTER
+#define TDA8425_USE_TFILTER 1
 #endif
 
 // ============================================================================
@@ -130,6 +130,12 @@ typedef enum TDA8425_Pseudo_Preset {
     TDA8425_Pseudo_Preset_Count = 3
 } TDA8425_Pseudo_Preset;
 
+//! T-filter mode
+typedef enum TDA8425_Tfilter_Mode {
+    TDA8425_Tfilter_Mode_Disabled = 0,
+    TDA8425_Tfilter_Mode_Enabled  = 1,
+} TDA8425_Tfilter_Mode;
+
 //! Datasheet specifications
 enum TDA8425_DatasheetSpecifications {
     TDA8425_Volume_Data_Bits  = 6,
@@ -147,6 +153,7 @@ enum TDA8425_DatasheetSpecifications {
 
     TDA8425_Bass_Frequency    =  300,  // [Hz]
     TDA8425_Treble_Frequency  = 4500,  // [Hz]
+    TDA8425_Tfilter_Frequency =  180,  // [Hz]
 
     TDA8425_Pseudo_R1         = 15000,  // [ohm]
     TDA8425_Pseudo_R2         = 15000,  // [ohm]
@@ -213,6 +220,12 @@ void TDA8425_BiQuadModel_SetupTreble(
     TDA8425_BiQuadModel* model,
     TDA8425_Float sample_rate,
     TDA8425_Float treble_gain
+);
+
+void TDA8425_BiQuadModel_SetupTfilter(
+    TDA8425_BiQuadModel* model,
+    TDA8425_Float sample_rate,
+    TDA8425_Float bass_gain
 );
 
 // ----------------------------------------------------------------------------
@@ -310,9 +323,9 @@ typedef struct TDA8425_ChipFloat
     TDA8425_Register reg_tr_;
     TDA8425_Register reg_sf_;
 
-    TDA8425_Float sample_rate_;
     TDA8425_Selector selector_;
     TDA8425_Mode mode_;
+    TDA8425_Float sample_rate_;
     TDA8425_Float volume_[TDA8425_Stereo_Count];
 
     TDA8425_BiQuadModel pseudo_model_;
@@ -324,6 +337,11 @@ typedef struct TDA8425_ChipFloat
     TDA8425_BiLinModel treble_model_;
     TDA8425_BiLinState treble_state_[TDA8425_Stereo_Count];
 
+#if TDA8425_USE_TFILTER
+    TDA8425_Tfilter_Mode tfilter_mode_;
+    TDA8425_BiQuadModel tfilter_model_;
+    TDA8425_BiQuadState tfilter_state_[TDA8425_Stereo_Count];
+#endif  // TDA8425_USE_TFILTER
 } TDA8425_Chip;
 
 typedef struct TDA8425_Chip_Process_Data
@@ -342,7 +360,8 @@ void TDA8425_Chip_Setup(
     TDA8425_Chip* self,
     TDA8425_Float sample_rate,
     TDA8425_Float pseudo_c1,
-    TDA8425_Float pseudo_c2
+    TDA8425_Float pseudo_c2,
+    TDA8425_Tfilter_Mode tfilter_mode
 );
 
 void TDA8425_Chip_Reset(TDA8425_Chip* self);

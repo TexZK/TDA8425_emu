@@ -107,6 +107,9 @@ OPTION (evaluated as per command line argument order):\n\
     Input source selector; default: S1.\n\
     See SELECTOR table.\n\
 \n\
+--t-filter\n\
+    Enables T-filter\n\
+\n\
 -t, --treble DECIBEL_TREBLE\n\
     Treble gain [dB]; default: 0.\n\
     Must belong to the possible treble gains, see DECIBEL_TREBLE.\n\
@@ -587,6 +590,7 @@ int main(int argc, char const* argv[])
     TDA8425_Float rate = 44100;
     TDA8425_Float pseudo_c1 = TDA8425_Pseudo_C1_Table[0];
     TDA8425_Float pseudo_c2 = TDA8425_Pseudo_C2_Table[0];
+    TDA8425_Tfilter_Mode tfilter_mode = TDA8425_Tfilter_Mode_Disabled;
     TDA8425_Register reg_vl = (TDA8425_Register)TDA8425_Volume_Data_Unity;
     TDA8425_Register reg_vr = (TDA8425_Register)TDA8425_Volume_Data_Unity;
     TDA8425_Register reg_ba = (TDA8425_Register)TDA8425_Tone_Data_Unity;
@@ -602,6 +606,9 @@ int main(int argc, char const* argv[])
             !strcmp(argv[i], "--help")) {
             puts(USAGE);
             return 0;
+        }
+        else if (!strcmp(argv[i], "--t-filter")) {
+            tfilter_mode = TDA8425_Tfilter_Mode_Enabled;
         }
 
         // Binary arguments
@@ -817,7 +824,7 @@ int main(int argc, char const* argv[])
 
     TDA8425_Chip chip;
     TDA8425_Chip_Ctor(&chip);
-    TDA8425_Chip_Setup(&chip, rate, pseudo_c1, pseudo_c2);
+    TDA8425_Chip_Setup(&chip, rate, pseudo_c1, pseudo_c2, tfilter_mode);
     TDA8425_Chip_Reset(&chip);
     TDA8425_Chip_Write(&chip, TDA8425_Reg_VL, reg_vl);
     TDA8425_Chip_Write(&chip, TDA8425_Reg_VR, reg_vr);

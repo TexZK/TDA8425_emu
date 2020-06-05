@@ -294,6 +294,45 @@ void TDA8425_BiQuadModel_SetupTreble(
 
 // ----------------------------------------------------------------------------
 
+void TDA8425_BiQuadModel_SetupTfilter(
+    TDA8425_BiQuadModel* model,
+    TDA8425_Float sample_rate,
+    TDA8425_Float bass_gain
+)
+{
+    double g = sqrt(bass_gain);
+    double fs = sample_rate;
+    double k = 0.5 / fs;
+    double w = (2 * M_PI) * (double)TDA8425_Tfilter_Frequency;
+
+    double log10_g = log10(g);
+    double ang = log10_g * 0.85;
+    double abs_sqrt_log10_g = fabs(sqrt(log10_g));
+    double abs2_sqrt_log10_g = abs_sqrt_log10_g * abs_sqrt_log10_g;
+    double kw = k * w;
+    double m_k2w2 = (kw * kw) * -0.05;
+    double sqrt_5 = 2.23606797749979;
+    double ph = M_PI * 0.75;
+    double h_sqrt_5_kw_abs_sqrt_log10_g = (0.2 * sqrt_5) * kw * abs_sqrt_log10_g;
+
+    double a0 = ((m_k2w2 - abs2_sqrt_log10_g) +
+                 (h_sqrt_5_kw_abs_sqrt_log10_g * cos(ang - ph)));
+
+    double a1 = (m_k2w2 + abs2_sqrt_log10_g) * 2;
+
+    double b0 = ((m_k2w2 - abs2_sqrt_log10_g) +
+                 (h_sqrt_5_kw_abs_sqrt_log10_g * cos(ang + ph)));
+
+    model->b0 = (TDA8425_Float)(b0 / a0);
+    model->b1 = (TDA8425_Float)(a1 / a0);
+    model->b2 = model->b0;
+
+    model->a1 = -model->b1;
+    model->a2 = 1;
+}
+
+// ----------------------------------------------------------------------------
+
 void TDA8425_BiQuadState_Clear(
     TDA8425_BiQuadState* state,
     TDA8425_Float output
@@ -481,9 +520,15 @@ void TDA8425_Chip_Setup(
     TDA8425_Chip* self,
     TDA8425_Float sample_rate,
     TDA8425_Float pseudo_c1,
-    TDA8425_Float pseudo_c2
+    TDA8425_Float pseudo_c2,
+    TDA8425_Tfilter_Mode tfilter_mode
 )
 {
+    (void)tfilter_mode;
+#if TDA8425_USE_TFILTER
+    self->tfilter_mode_ = tfilter_mode;
+#endif  // TDA8425_USE_TFILTER
+
     self->sample_rate_ = sample_rate;
 
     TDA8425_BiQuadModel_SetupPseudo(
@@ -638,7 +683,22 @@ void TDA8425_Chip_Process(
             sample
         );
 
+#if TDA8425_USE_TFILTER
+        if (self->tfilter_mode_ == TDA8425_Tfilter_Mode_Disabled) {
+            data->outputs[channel] = sample;  // likely branch
+        }
+        else {
+            sample = TDA8425_BiQuad_Process(
+                &self->tfilter_model_,
+                &self->tfilter_state_[channel],
+                sample
+            );
+
+            data->outputs[channel] = sample;
+        }
+#else  // TDA8425_USE_TFILTER
         data->outputs[channel] = sample;
+#endif  // TDA8425_USE_TFILTER
     }
 }
 
@@ -698,22 +758,34 @@ void TDA8425_Chip_Write(
     case TDA8425_Reg_BA:
         data |= (TDA8425_Register)~TDA8425_Tone_Data_Mask;
         self->reg_ba_ = data;
+        TDA8425_Float bass_gain = TDA8425_RegisterToBass(data);
 
         TDA8425_BiLinModel_SetupBass(
             &self->bass_model_,
             self->sample_rate_,
-            TDA8425_RegisterToBass(data)
+            bass_gain
         );
+
+#if TDA8425_USE_TFILTER
+        if (self->tfilter_mode_) {
+            TDA8425_BiQuadModel_SetupTfilter(
+                &self->tfilter_model_,
+                self->sample_rate_,
+                bass_gain
+            );
+        }
+#endif  // TDA8425_USE_TFILTER
         break;
 
     case TDA8425_Reg_TR:
         data |= (TDA8425_Register)~TDA8425_Tone_Data_Mask;
         self->reg_tr_ = data;
+        TDA8425_Float treble_gain = TDA8425_RegisterToTreble(data);
 
         TDA8425_BiLinModel_SetupTreble(
             &self->treble_model_,
             self->sample_rate_,
-            TDA8425_RegisterToTreble(data)
+            treble_gain
         );
         break;
 

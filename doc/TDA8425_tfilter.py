@@ -48,16 +48,16 @@ s, z, w, g, k, wb, wt = symbols('s z w g k wb wt')
 r = sqrt(1/sabs(20*log10(g)))
 gn = log10(g)*0.85
 ph = pi*(3/4)
-p1 = r*w * (cos(ph-gn) + 1j*sin(ph-gn))
-p2 = r*w * (cos(ph-gn) - 1j*sin(ph-gn))
-z1 = r*w * (cos(ph+gn) + 1j*sin(ph+gn))
-z2 = r*w * (cos(ph+gn) - 1j*sin(ph+gn))
+p1 = r*w * (cos(ph - gn) + 1j*sin(ph - gn))
+p2 = r*w * (cos(ph - gn) - 1j*sin(ph - gn))
+z1 = r*w * (cos(ph + gn) + 1j*sin(ph + gn))
+z2 = r*w * (cos(ph + gn) - 1j*sin(ph + gn))
 
 Hs = 1
 Hs = Hs * ((s - z1) * (s - z2)) / ((s - p1) * (s - p2))  # resonance
-Hs = Hs * s / (s + 2*pi*12)  # DC removal
-Hs = Hs * (s + wb*g) / (s + wb/g)  # basic bass
-Hs = Hs * g*g * (s + wt/g) / (s + wt*g)  # basic treble
+# Hs = Hs * s / (s + 2*pi*12)  # DC removal
+# Hs = Hs * (s + wb*g) / (s + wb/g)  # basic bass
+# Hs = Hs * g*g * (s + wt/g) / (s + wt*g)  # basic treble
 spprint('H(s):', Hs)
 
 Hz = Hs.subs(s, (1/k * (z - 1) / (z + 1)))
@@ -139,7 +139,7 @@ for db in dbs:
         'wb': 2*np.pi * 300,
         'wt': 2*np.pi * 4500,
         'k': 0.5 / Fs,
-        'g': 10**(db / (20 * 2)),
+        'g': np.sqrt(10**(db / 20)),
     }
 
     ak = np.array([x.subs(values) for x in a], dtype=dtype)
