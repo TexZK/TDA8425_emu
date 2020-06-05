@@ -609,6 +609,7 @@ int main(int argc, char const* argv[])
         }
         else if (!strcmp(argv[i], "--t-filter")) {
             tfilter_mode = TDA8425_Tfilter_Mode_Enabled;
+            continue;
         }
 
         // Binary arguments

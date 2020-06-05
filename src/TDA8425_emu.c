@@ -328,7 +328,7 @@ void TDA8425_BiQuadModel_SetupTfilter(
     model->b2 = model->b0;
 
     model->a1 = -model->b1;
-    model->a2 = 1;
+    model->a2 = -1;
 }
 
 // ----------------------------------------------------------------------------
@@ -562,6 +562,9 @@ void TDA8425_Chip_Start(TDA8425_Chip* self)
     for (int i = 0; i < TDA8425_Stereo_Count; ++i) {
         TDA8425_BiLinState_Clear(&self->bass_state_[i], 0);
         TDA8425_BiLinState_Clear(&self->treble_state_[i], 0);
+#if TDA8425_USE_TFILTER
+        TDA8425_BiQuadState_Clear(&self->tfilter_state_[i], 0);
+#endif  // TDA8425_USE_TFILTER
     }
 }
 
@@ -685,7 +688,7 @@ void TDA8425_Chip_Process(
 
 #if TDA8425_USE_TFILTER
         if (self->tfilter_mode_ == TDA8425_Tfilter_Mode_Disabled) {
-            data->outputs[channel] = sample;  // likely branch
+            data->outputs[channel] = sample;  // shortcut
         }
         else {
             sample = TDA8425_BiQuad_Process(
