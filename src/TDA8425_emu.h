@@ -62,6 +62,16 @@ typedef enum TDA8425_Reg {
     TDA8425_Reg_SF = 8
 } TDA8425_Reg;
 
+//! Register index enumerator
+typedef enum TDA8425_RegOrder {
+    TDA8425_RegOrder_VL    = 0,
+    TDA8425_RegOrder_VR    = 1,
+    TDA8425_RegOrder_BA    = 2,
+    TDA8425_RegOrder_TR    = 3,
+    TDA8425_RegOrder_SF    = 4,
+    TDA8425_RegOrder_Count = 5
+} TDA8425_Reg;
+
 //! Switch functions bit identifiers
 typedef enum TDA8425_Reg_SF_Bit {
     TDA8425_Reg_SF_IS    = 0,

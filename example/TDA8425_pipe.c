@@ -88,19 +88,19 @@ OPTION (evaluated as per command line argument order):\n\
     Pseudo-stereo capacitance preset; default 1.\n\
     See PSEUDO_PRESET table.\n\
 \n\
---reg_ba [0x]HEX\n\
+--reg-BA [0x]HEX\n\
     Value of BA (bass) register; hexadecimal string.\n\
 \n\
---reg_sf [0x]HEX\n\
+--reg-SF [0x]HEX\n\
     Value of SF (switch function) register; hexadecimal string.\n\
 \n\
---reg_tr [0x]HEX\n\
+--reg-TR [0x]HEX\n\
     Value of TR (treble) register; hexadecimal string.\n\
 \n\
---reg_vl [0x]HEX\n\
+--reg-VL [0x]HEX\n\
     Value of VL (volume left) register; hexadecimal string.\n\
 \n\
---reg_vr [0x]HEX\n\
+--reg-VR [0x]HEX\n\
     Value of VR (volume right) register; hexadecimal string.\n\
 \n\
 -s, --selector SELECTOR\n\
@@ -554,6 +554,20 @@ struct FormatTable {
 };
 
 
+struct RegisterTable {
+    char const* label;
+    TDA8425_Reg value;
+} const REGISTER_TABLE[(int)TDA8425_RegOrder_Count + 1] =
+{
+    { "VL", TDA8425_Reg_VL },
+    { "VR", TDA8425_Reg_VR },
+    { "BA", TDA8425_Reg_BA },
+    { "TR", TDA8425_Reg_TR },
+    { "SF", TDA8425_Reg_SF },
+    { NULL, (TDA8425_Reg)0 }
+};
+
+
 struct SelectorTable {
     char const* label;
     TDA8425_Selector value;
@@ -569,6 +583,18 @@ struct SelectorTable {
 };
 
 
+typedef struct Args {
+    long channels;
+    STREAM_READER stream_reader;
+    STREAM_WRITER stream_writer;
+    TDA8425_Float rate;
+    TDA8425_Float pseudo_c1;
+    TDA8425_Float pseudo_c2;
+    TDA8425_Tfilter_Mode tfilter_mode;
+    TDA8425_Register regs[TDA8425_RegOrder_Count];
+} Args;
+
+
 struct ModeTable {
     char const* label;
     TDA8425_Mode value;
@@ -582,20 +608,24 @@ struct ModeTable {
 };
 
 
+static int Run(Args const* args);
+
+
 int main(int argc, char const* argv[])
 {
-    long channels = 1;
-    STREAM_READER stream_reader = ReadU8;
-    STREAM_WRITER stream_writer = WriteU8;
-    TDA8425_Float rate = 44100;
-    TDA8425_Float pseudo_c1 = TDA8425_Pseudo_C1_Table[0];
-    TDA8425_Float pseudo_c2 = TDA8425_Pseudo_C2_Table[0];
-    TDA8425_Tfilter_Mode tfilter_mode = TDA8425_Tfilter_Mode_Disabled;
-    TDA8425_Register reg_vl = (TDA8425_Register)TDA8425_Volume_Data_Unity;
-    TDA8425_Register reg_vr = (TDA8425_Register)TDA8425_Volume_Data_Unity;
-    TDA8425_Register reg_ba = (TDA8425_Register)TDA8425_Tone_Data_Unity;
-    TDA8425_Register reg_tr = (TDA8425_Register)TDA8425_Tone_Data_Unity;
-    TDA8425_Register reg_sf = (
+    Args args;
+    args.channels = 1;
+    args.stream_reader = ReadU8;
+    args.stream_writer = WriteU8;
+    args.rate = 44100;
+    args.pseudo_c1 = TDA8425_Pseudo_C1_Table[0];
+    args.pseudo_c2 = TDA8425_Pseudo_C2_Table[0];
+    args.tfilter_mode = TDA8425_Tfilter_Mode_Disabled;
+    args.regs[TDA8425_RegOrder_VL] = (TDA8425_Register)TDA8425_Volume_Data_Unity;
+    args.regs[TDA8425_RegOrder_VR] = (TDA8425_Register)TDA8425_Volume_Data_Unity;
+    args.regs[TDA8425_RegOrder_BA] = (TDA8425_Register)TDA8425_Tone_Data_Unity;
+    args.regs[TDA8425_RegOrder_TR] = (TDA8425_Register)TDA8425_Tone_Data_Unity;
+    args.regs[TDA8425_RegOrder_SF] = (
         (TDA8425_Register)TDA8425_Selector_Stereo_1 |
         ((TDA8425_Register)TDA8425_Mode_LinearStereo << TDA8425_Reg_SF_STL)
     );
@@ -608,7 +638,7 @@ int main(int argc, char const* argv[])
             return 0;
         }
         else if (!strcmp(argv[i], "--t-filter")) {
-            tfilter_mode = TDA8425_Tfilter_Mode_Enabled;
+            args.tfilter_mode = TDA8425_Tfilter_Mode_Enabled;
             continue;
         }
 
@@ -618,12 +648,12 @@ int main(int argc, char const* argv[])
             return 1;
         }
         else if (!strcmp(argv[i], "-b") ||
-                 !strcmp(argv[i], "--bass")) {
+            !strcmp(argv[i], "--bass")) {
             long db = strtol(argv[++i], NULL, 10);
             int j;
             for (j = 0; j < TDA8425_Tone_Data_Count; ++j) {
                 if (TDA8425_BassDecibel_Table[j] == db) {
-                    reg_ba = (TDA8425_Register)j;
+                    args.regs[TDA8425_RegOrder_BA] = (TDA8425_Register)j;
                     break;
                 }
             }
@@ -633,24 +663,24 @@ int main(int argc, char const* argv[])
             }
         }
         else if (!strcmp(argv[i], "-c") ||
-                 !strcmp(argv[i], "--channels")) {
-            channels = strtol(argv[++i], NULL, 10);
-            if (channels < 1) {
+            !strcmp(argv[i], "--channels")) {
+            args.channels = strtol(argv[++i], NULL, 10);
+            if (args.channels < 1) {
                 fprintf(stderr, "Invalid channels: %s", argv[i]);
                 return 1;
             }
-            else if (channels > MAX_INPUTS) {
-                channels = MAX_INPUTS;
+            else if (args.channels > MAX_INPUTS) {
+                args.channels = MAX_INPUTS;
             }
         }
         else if (!strcmp(argv[i], "-f") ||
-                 !strcmp(argv[i], "--format")) {
+            !strcmp(argv[i], "--format")) {
             char const* label = argv[++i];
             int j;
             for (j = 0; FORMAT_TABLE[j].label; ++j) {
                 if (!strcmp(label, FORMAT_TABLE[j].label)) {
-                    stream_reader = FORMAT_TABLE[j].reader;
-                    stream_writer = FORMAT_TABLE[j].writer;
+                    args.stream_reader = FORMAT_TABLE[j].reader;
+                    args.stream_writer = FORMAT_TABLE[j].writer;
                     break;
                 }
             }
@@ -660,13 +690,13 @@ int main(int argc, char const* argv[])
             }
         }
         else if (!strcmp(argv[i], "-m") ||
-                 !strcmp(argv[i], "--mode")) {
+            !strcmp(argv[i], "--mode")) {
             char const* label = argv[++i];
             int j;
             for (j = 0; MODE_TABLE[j].label; ++j) {
                 if (!strcmp(label, MODE_TABLE[j].label)) {
-                    reg_sf &= (TDA8425_Register)~(TDA8425_Mode_Mask << TDA8425_Reg_SF_STL);
-                    reg_sf |= (TDA8425_Register)MODE_TABLE[j].value << TDA8425_Reg_SF_STL;
+                    args.regs[TDA8425_RegOrder_SF] &= (TDA8425_Register)~(TDA8425_Mode_Mask << TDA8425_Reg_SF_STL);
+                    args.regs[TDA8425_RegOrder_SF] |= (TDA8425_Register)MODE_TABLE[j].value << TDA8425_Reg_SF_STL;
                     break;
                 }
             }
@@ -681,7 +711,7 @@ int main(int argc, char const* argv[])
                 fprintf(stderr, "Invalid capacitance: %s", argv[i]);
                 return 1;
             }
-            pseudo_c1 = (TDA8425_Float)value;
+            args.pseudo_c1 = (TDA8425_Float)value;
         }
         else if (!strcmp(argv[i], "--pseudo-c2")) {
             double value = atof(argv[++i]);
@@ -689,7 +719,7 @@ int main(int argc, char const* argv[])
                 fprintf(stderr, "Invalid capacitance: %s", argv[i]);
                 return 1;
             }
-            pseudo_c2 = (TDA8425_Float)value;
+            args.pseudo_c2 = (TDA8425_Float)value;
         }
         else if (!strcmp(argv[i], "--pseudo-preset")) {
             long preset = strtol(argv[++i], NULL, 10);
@@ -698,40 +728,44 @@ int main(int argc, char const* argv[])
                 return 1;
             }
             --preset;
-            pseudo_c1 = TDA8425_Pseudo_C1_Table[preset];
-            pseudo_c2 = TDA8425_Pseudo_C2_Table[preset];
+            args.pseudo_c1 = TDA8425_Pseudo_C1_Table[preset];
+            args.pseudo_c2 = TDA8425_Pseudo_C2_Table[preset];
         }
         else if (!strcmp(argv[i], "-r") ||
-                 !strcmp(argv[i], "--rate")) {
-            rate = (TDA8425_Float)atof(argv[++i]);
-            if (rate < 1) {
+            !strcmp(argv[i], "--rate")) {
+            args.rate = (TDA8425_Float)atof(argv[++i]);
+            if (args.rate < 1) {
                 fprintf(stderr, "Invalid rate: %s", argv[i]);
                 return 1;
             }
         }
-        else if (!strcmp(argv[i], "--reg_ba")) {
-            reg_ba = (TDA8425_Register)strtol(argv[++i], NULL, 16);
-        }
-        else if (!strcmp(argv[i], "--reg_sf")) {
-            reg_sf = (TDA8425_Register)strtol(argv[++i], NULL, 16);
-        }
-        else if (!strcmp(argv[i], "--reg_tr")) {
-            reg_tr = (TDA8425_Register)strtol(argv[++i], NULL, 16);
-        }
-        else if (!strcmp(argv[i], "--reg_vl")) {
-            reg_vl = (TDA8425_Register)strtol(argv[++i], NULL, 16);
-        }
-        else if (!strcmp(argv[i], "--reg_vr")) {
-            reg_vr = (TDA8425_Register)strtol(argv[++i], NULL, 16);
+        else if (!strncmp(argv[i], "--reg-", 6)) {
+            char const* label = &argv[i][6];
+            int r;
+            for (r = 0; REGISTER_TABLE[r].label; ++r) {
+                if (!strcmp(label, REGISTER_TABLE[r].label)) {
+                    break;
+                }
+            }
+            if (!REGISTER_TABLE[r].label) {
+                fprintf(stderr, "Unknown register: %s", label);
+                return 1;
+            }
+            long value = strtol(argv[++i], NULL, 16);
+            if (errno || value < 0x00 || value > 0xFF) {
+                fprintf(stderr, "Invalid register value: %s", argv[i]);
+                return 1;
+            }
+            args.regs[r] = (TDA8425_Register)value;
         }
         else if (!strcmp(argv[i], "-s") ||
-                 !strcmp(argv[i], "--selector")) {
+            !strcmp(argv[i], "--selector")) {
             char const* label = argv[++i];
             int j;
             for (j = 0; SELECTOR_TABLE[j].label; ++j) {
                 if (!strcmp(label, SELECTOR_TABLE[j].label)) {
-                    reg_sf &= (TDA8425_Register)~TDA8425_Selector_Mask;
-                    reg_sf |= (TDA8425_Register)SELECTOR_TABLE[j].value;
+                    args.regs[TDA8425_RegOrder_SF] &= (TDA8425_Register)~TDA8425_Selector_Mask;
+                    args.regs[TDA8425_RegOrder_SF] |= (TDA8425_Register)SELECTOR_TABLE[j].value;
                     break;
                 }
             }
@@ -741,12 +775,12 @@ int main(int argc, char const* argv[])
             }
         }
         else if (!strcmp(argv[i], "-t") ||
-                 !strcmp(argv[i], "--treble")) {
+            !strcmp(argv[i], "--treble")) {
             long db = strtol(argv[++i], NULL, 10);
             int j;
             for (j = 0; j < TDA8425_Tone_Data_Count; ++j) {
                 if (TDA8425_TrebleDecibel_Table[j] == db) {
-                    reg_tr = (TDA8425_Register)j;
+                    args.regs[TDA8425_RegOrder_TR] = (TDA8425_Register)j;
                     break;
                 }
             }
@@ -756,13 +790,13 @@ int main(int argc, char const* argv[])
             }
         }
         else if (!strcmp(argv[i], "-v") ||
-                 !strcmp(argv[i], "--volume")) {
+            !strcmp(argv[i], "--volume")) {
             long db = strtol(argv[++i], NULL, 10);
             int j;
             for (j = 0; j < TDA8425_Volume_Data_Count; ++j) {
                 if (TDA8425_VolumeDecibel_Table[j] == db) {
-                    reg_vl = (TDA8425_Register)j;
-                    reg_vr = (TDA8425_Register)j;
+                    args.regs[TDA8425_RegOrder_VL] = (TDA8425_Register)j;
+                    args.regs[TDA8425_RegOrder_VR] = (TDA8425_Register)j;
                     break;
                 }
             }
@@ -776,7 +810,7 @@ int main(int argc, char const* argv[])
             int j;
             for (j = 0; j < TDA8425_Volume_Data_Count; ++j) {
                 if (TDA8425_VolumeDecibel_Table[j] == db) {
-                    reg_vl = (TDA8425_Register)j;
+                    args.regs[TDA8425_RegOrder_VL] = (TDA8425_Register)j;
                     break;
                 }
             }
@@ -790,7 +824,7 @@ int main(int argc, char const* argv[])
             int j;
             for (j = 0; j < TDA8425_Volume_Data_Count; ++j) {
                 if (TDA8425_VolumeDecibel_Table[j] == db) {
-                    reg_vr = (TDA8425_Register)j;
+                    args.regs[TDA8425_RegOrder_VR] = (TDA8425_Register)j;
                     break;
                 }
             }
@@ -823,59 +857,60 @@ int main(int argc, char const* argv[])
         return 1;
     }
 
-    TDA8425_Chip chip;
-    TDA8425_Chip_Ctor(&chip);
-    TDA8425_Chip_Setup(&chip, rate, pseudo_c1, pseudo_c2, tfilter_mode);
-    TDA8425_Chip_Reset(&chip);
-    TDA8425_Chip_Write(&chip, TDA8425_Reg_VL, reg_vl);
-    TDA8425_Chip_Write(&chip, TDA8425_Reg_VR, reg_vr);
-    TDA8425_Chip_Write(&chip, TDA8425_Reg_BA, reg_ba);
-    TDA8425_Chip_Write(&chip, TDA8425_Reg_TR, reg_tr);
-    TDA8425_Chip_Write(&chip, TDA8425_Reg_SF, reg_sf);
-    TDA8425_Chip_Start(&chip);
+    return Run(&args);
+}
+
+
+static int Run(Args const* args)
+{
+    TDA8425_Chip* chip;
+    chip = (TDA8425_Chip*)malloc(sizeof(TDA8425_Chip));
+    if (!chip) {
+        return 1;
+    }
+    TDA8425_Chip_Ctor(chip);
+    TDA8425_Chip_Setup(chip, args->rate, args->pseudo_c1, args->pseudo_c2, args->tfilter_mode);
+    TDA8425_Chip_Reset(chip);
+    TDA8425_Chip_Write(chip, (TDA8425_Address)TDA8425_Reg_VL, args->regs[TDA8425_RegOrder_VL]);
+    TDA8425_Chip_Write(chip, (TDA8425_Address)TDA8425_Reg_VR, args->regs[TDA8425_RegOrder_VR]);
+    TDA8425_Chip_Write(chip, (TDA8425_Address)TDA8425_Reg_BA, args->regs[TDA8425_RegOrder_BA]);
+    TDA8425_Chip_Write(chip, (TDA8425_Address)TDA8425_Reg_TR, args->regs[TDA8425_RegOrder_TR]);
+    TDA8425_Chip_Write(chip, (TDA8425_Address)TDA8425_Reg_SF, args->regs[TDA8425_RegOrder_SF]);
+    TDA8425_Chip_Start(chip);
+    int error = 0;
 
     while (!feof(stdin)) {
         TDA8425_Chip_Process_Data data;
         long channel;
 
         TDA8425_Float* inputs = &data.inputs[0][0];  // overflows
-        for (channel = 0; channel < channels; ++channel) {
-            if (!stream_reader(&inputs[channel])) {
+        for (channel = 0; channel < args->channels; ++channel) {
+            if (!args->stream_reader(&inputs[channel])) {
                 if (ferror(stdin)) {
                     perror("stream_reader()");
-                    goto on_error_;
+                    error = 1;
                 }
-                else {
-                    goto on_eof_;
-                }
+                goto end;
             }
         }
         for (; channel < MAX_INPUTS; ++channel) {
             inputs[channel] = 0;
         }
 
-        TDA8425_Chip_Process(&chip, &data);
+        TDA8425_Chip_Process(chip, &data);
 
         for (channel = 0; channel < MAX_OUTPUTS; ++channel) {
-            if (!stream_writer(data.outputs[channel])) {
-                if (ferror(stdout)) {
-                    perror("stream_writer()");
-                    goto on_error_;
-                }
-                else {
-                    goto on_eof_;
-                }
+            if (!args->stream_writer(data.outputs[channel])) {
+                perror("stream_writer()");
+                error = 1;
+                goto end;
             }
         }
     }
 
-on_eof_:
-    TDA8425_Chip_Stop(&chip);
-    TDA8425_Chip_Dtor(&chip);
-    return 0;
-
-on_error_:
-    TDA8425_Chip_Stop(&chip);
-    TDA8425_Chip_Dtor(&chip);
-    return 1;
+end:
+    TDA8425_Chip_Stop(chip);
+    TDA8425_Chip_Dtor(chip);
+    free(chip);
+    return error;
 }

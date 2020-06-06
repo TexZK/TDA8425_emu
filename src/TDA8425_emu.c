@@ -548,19 +548,19 @@ void TDA8425_Chip_Setup(
         pseudo_c2
     );
 
-    TDA8425_Chip_Write(self, TDA8425_Reg_BA, self->reg_ba_);
-    TDA8425_Chip_Write(self, TDA8425_Reg_TR, self->reg_tr_);
+    TDA8425_Chip_Write(self, (TDA8425_Address)TDA8425_Reg_BA, self->reg_ba_);
+    TDA8425_Chip_Write(self, (TDA8425_Address)TDA8425_Reg_TR, self->reg_tr_);
 }
 
 // ----------------------------------------------------------------------------
 
 void TDA8425_Chip_Reset(TDA8425_Chip* self)
 {
-    TDA8425_Chip_Write(self, TDA8425_Reg_VL, 0);
-    TDA8425_Chip_Write(self, TDA8425_Reg_VR, 0);
-    TDA8425_Chip_Write(self, TDA8425_Reg_BA, 0);
-    TDA8425_Chip_Write(self, TDA8425_Reg_TR, 0);
-    TDA8425_Chip_Write(self, TDA8425_Reg_SF, 0);
+    TDA8425_Chip_Write(self, (TDA8425_Address)TDA8425_Reg_VL, 0);
+    TDA8425_Chip_Write(self, (TDA8425_Address)TDA8425_Reg_VR, 0);
+    TDA8425_Chip_Write(self, (TDA8425_Address)TDA8425_Reg_BA, 0);
+    TDA8425_Chip_Write(self, (TDA8425_Address)TDA8425_Reg_TR, 0);
+    TDA8425_Chip_Write(self, (TDA8425_Address)TDA8425_Reg_SF, 0);
 }
 
 // ----------------------------------------------------------------------------
@@ -722,7 +722,7 @@ TDA8425_Register TDA8425_Chip_Read(
     TDA8425_Address address
 )
 {
-    switch (address)
+    switch ((TDA8425_Reg)address)
     {
     case TDA8425_Reg_VL:
         return self->reg_vl_ | (TDA8425_Register)~TDA8425_Volume_Data_Mask;
@@ -752,7 +752,7 @@ void TDA8425_Chip_Write(
     TDA8425_Register data
 )
 {
-    switch (address)
+    switch ((TDA8425_Reg)address)
     {
     case TDA8425_Reg_VL:
         data |= (TDA8425_Register)~TDA8425_Volume_Data_Mask;
