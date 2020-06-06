@@ -117,7 +117,7 @@ datasheet.
 The datasheet describes the pseudo stereo with a clear schematic.
 By knowning the phase diagram and the associated capacitance values, it is
 possible to calculate the internal resistance values.
-The script [TDA8425_pseudo.py](doc/TDA8425_pseudo.py) was used in the
+The script [TDA8425_pseudo.py](tools/TDA8425_pseudo.py) was used in the
 development, to expand the expressions to calculate the biquad coefficients.
 It also helped in the identification of internal resistance values, which
 should be around 15 kΩ, but it looks like the plots on the datasheet are not as
@@ -141,7 +141,7 @@ The relationship between generic channels *a* and *b* is the following:
 where `Rfa/Rc` is 52%.
 
 A simple ideal circuit is emulated in the *SPICE* model:
-[TDA8425_spatial.asc](doc/TDA8425_spatial.asc).
+[TDA8425_spatial.asc](tools/TDA8425_spatial.asc).
 
 ![Spatial stereo schematic highlight](doc/TDA8425_spatial.png)
 
@@ -158,13 +158,13 @@ It looks like the they are centered around 300 Hz and 4500 Hz, respectively.
 I chose *bi-linear* implementation instead of *bi-quadratic* for both filters,
 to maintain separation of concerns.
 They were designed with the help of the
-[TDA8425_shelving.py](doc/TDA8425_shelving.py) Python script.
+[TDA8425_shelving.py](tools/TDA8425_shelving.py) Python script.
 
 
 Furthermore, it looks like the *T-filter* has an additional second-order
 frequency response for bass control, which is factored into a dedicated biquad
 filter. You can refer to the
-[TDA8425_tfilter.py](doc/TDA8425_tfilter.py) Python script for reference.
+[TDA8425_tfilter.py](tools/TDA8425_tfilter.py) Python script for reference.
 
 ![Tone control frequen response](doc/tone_control.png)
 
