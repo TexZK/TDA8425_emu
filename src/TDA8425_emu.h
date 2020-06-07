@@ -70,7 +70,7 @@ typedef enum TDA8425_RegOrder {
     TDA8425_RegOrder_TR    = 3,
     TDA8425_RegOrder_SF    = 4,
     TDA8425_RegOrder_Count = 5
-} TDA8425_Reg;
+} TDA8425_RegOrder;
 
 //! Switch functions bit identifiers
 typedef enum TDA8425_Reg_SF_Bit {
