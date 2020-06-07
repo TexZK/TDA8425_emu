@@ -196,20 +196,20 @@ bash make_gcc.sh
 ```
 
 3. You should find the generated executable file as `TDA8425_pipe`.
-4. Generate a noise sample at 192000 Hz, stereo, signed 16-bit little-endian:
+4. Generate some noise at 192000 Hz, stereo, signed 16-bit little-endian:
 
 ```bash
 python3 gen_noise.py
 ```
 
 5. You should find the generated noise sample as `noise.raw`.
-6. Process noise to have  afull bass and trebel boost, with *T-filter*:
+6. Process noise to have full bass and treble boost, with *T-filter*:
 
 ```bash
 ./TDA8425_pipe -r 192000 -c 2 -f S16_LE -v -6 -b +15 -t +12 --t-filter < noise.raw > out.raw
 ```
 
-7. Import `out.raw` with `audacity`:
+7. Import `out.raw` as *raw data* with *Audacity*:
 
 ![Import raw data](doc/import_raw_data.png)
 
@@ -217,8 +217,8 @@ python3 gen_noise.py
 
 ![Full boost spectrum analysis](doc/full_boost.png)
 
-9. You can also play the audio directly with `aplay` (using `\\` for line
-continuation):
+9. You can also play the audio directly with `aplay` (the `\\` is for command
+   line continuation):
 
 ```bash
 ./TDA8425_pipe -r 192000 -c 2 -f S16_LE -v -6 -b +15 -t +12 --t-filter < noise.raw \
