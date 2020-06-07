@@ -206,7 +206,7 @@ python3 gen_noise.py
 6. Process noise to have  afull bass and trebel boost, with *T-filter*:
 
 ```bash
-./TDA8425_pipe -r 192000 -c 2 -f S16_LE -v -0 -b +15 -t +12 --t-filter < noise.raw > out.raw
+./TDA8425_pipe -r 192000 -c 2 -f S16_LE -v -6 -b +15 -t +12 --t-filter < noise.raw > out.raw
 ```
 
 7. Import `out.raw` with `audacity`:
@@ -217,8 +217,10 @@ python3 gen_noise.py
 
 ![Full boost spectrum analysis](doc/full_boost.png)
 
-9. You can also play the audio directly with `aplay`:
+9. You can also play the audio directly with `aplay` (using `\\` for line
+continuation):
 
 ```bash
-./TDA8425_pipe -r 192000 -c 2 -f S16_LE -v -0 -b +15 -t +12 --t-filter < noise.raw | aplay -c 2 -r 192000 -f S16_LE
+./TDA8425_pipe -r 192000 -c 2 -f S16_LE -v -6 -b +15 -t +12 --t-filter < noise.raw \
+| aplay -c 2 -r 192000 -f S16_LE
 ```
