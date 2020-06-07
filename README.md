@@ -179,3 +179,46 @@ generates outputs on the *standard output*.
 Please refer to its own help page, by calling the canonical
 `TDA8425_pipe --help`, or reading it embedded in
 [its source code](example/TDA8425_pipe.c).
+
+### Usage example with Lubuntu 20.04
+
+1. Ensure the following packages are installed:
+
+```bash
+sudo apt install alsa-utils audacity build-essential python3
+```
+
+2. Enter [example](example) folder and run [make_gcc.sh](example/make_gcc.sh):
+
+```bash
+cd example
+bash make_gcc.sh
+```
+
+3. You should find the generated executable file as `TDA8425_pipe`.
+4. Generate a noise sample at 192000 Hz, stereo, signed 16-bit little-endian:
+
+```bash
+python3 gen_noise.py
+```
+
+5. You should find the generated noise sample as `noise.raw`.
+6. Process noise to have  afull bass and trebel boost, with *T-filter*:
+
+```bash
+./TDA8425_pipe -r 192000 -c 2 -f S16_LE -v -0 -b +15 -t +12 --t-filter < noise.raw > out.raw
+```
+
+7. Import `out.raw` with `audacity`:
+
+![Import raw data](doc/import_raw_data.png)
+
+8. Plot the spectrum analysis:
+
+![Full boost spectrum analysis](doc/full_boost.png)
+
+9. You can also play the audio directly with `aplay`:
+
+```bash
+./TDA8425_pipe -r 192000 -c 2 -f S16_LE -v -0 -b +15 -t +12 --t-filter < noise.raw | aplay -c 2 -r 192000 -f S16_LE
+```
