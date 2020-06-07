@@ -30,13 +30,16 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <errno.h>
 #include <fcntl.h>
-#include <io.h>
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
 #include "endian.h"
+
+#ifdef __WINDOWS__
+#include <io.h>
+#endif
 
 
 static char const* USAGE = ("\
@@ -845,6 +848,7 @@ int main(int argc, char const* argv[])
         }
     }
 
+#ifdef __WINDOWS__
     _setmode(_fileno(stdin), O_BINARY);
     if (errno) {
         perror("_setmode(stdin)");
@@ -856,6 +860,7 @@ int main(int argc, char const* argv[])
         perror("_setmode(stdout)");
         return 1;
     }
+#endif  // __WINDOWS__
 
     return Run(&args);
 }
