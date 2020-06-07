@@ -48,6 +48,12 @@ extern "C" {
 
 // ============================================================================
 
+#define TDA8425_VERSION "0.1.0"
+
+char const* TDA8425_GetVersion(void);
+
+// ============================================================================
+
 typedef uint8_t       TDA8425_Address;   //!< Address data type
 typedef uint8_t       TDA8425_Register;  //!< Register data type
 typedef size_t        TDA8425_Index;     //!< Sample index data type

@@ -36,6 +36,13 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 // ============================================================================
 
+char const* TDA8425_GetVersion(void)
+{
+    return TDA8425_VERSION;
+}
+
+// ============================================================================
+
 signed char const TDA8425_VolumeDecibel_Table[TDA8425_Volume_Data_Count] =
 {
     -128,  //  0
