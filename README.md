@@ -196,6 +196,7 @@ bash make_gcc.sh
 ```
 
 3. You should find the generated executable file as `TDA8425_pipe`.
+
 4. Generate some noise at 192000 Hz, stereo, signed 16-bit little-endian:
 
 ```bash
@@ -203,6 +204,7 @@ python3 gen_noise.py
 ```
 
 5. You should find the generated noise sample as `noise.raw`.
+
 6. Process noise to have full bass and treble boost, with *T-filter*:
 
 ```bash
@@ -217,7 +219,7 @@ python3 gen_noise.py
 
 ![Full boost spectrum analysis](doc/full_boost.png)
 
-9. You can also play the audio directly with `aplay` (the `\\` is for command
+9. You can also play the audio directly with `aplay` (the `\` is for command
    line continuation):
 
 ```bash
