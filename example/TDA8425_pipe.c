@@ -650,8 +650,7 @@ int main(int argc, char const* argv[])
             fprintf(stderr, "Expecting binary argument: %s", argv[i]);
             return 1;
         }
-        else if (!strcmp(argv[i], "-b") ||
-            !strcmp(argv[i], "--bass")) {
+        else if (!strcmp(argv[i], "-b") || !strcmp(argv[i], "--bass")) {
             long db = strtol(argv[++i], NULL, 10);
             int j;
             for (j = 0; j < TDA8425_Tone_Data_Count; ++j) {
@@ -665,8 +664,7 @@ int main(int argc, char const* argv[])
                 return 1;
             }
         }
-        else if (!strcmp(argv[i], "-c") ||
-            !strcmp(argv[i], "--channels")) {
+        else if (!strcmp(argv[i], "-c") || !strcmp(argv[i], "--channels")) {
             args.channels = strtol(argv[++i], NULL, 10);
             if (args.channels < 1) {
                 fprintf(stderr, "Invalid channels: %s", argv[i]);
@@ -676,8 +674,7 @@ int main(int argc, char const* argv[])
                 args.channels = MAX_INPUTS;
             }
         }
-        else if (!strcmp(argv[i], "-f") ||
-            !strcmp(argv[i], "--format")) {
+        else if (!strcmp(argv[i], "-f") || !strcmp(argv[i], "--format")) {
             char const* label = argv[++i];
             int j;
             for (j = 0; FORMAT_TABLE[j].label; ++j) {
@@ -692,8 +689,7 @@ int main(int argc, char const* argv[])
                 return 1;
             }
         }
-        else if (!strcmp(argv[i], "-m") ||
-            !strcmp(argv[i], "--mode")) {
+        else if (!strcmp(argv[i], "-m") || !strcmp(argv[i], "--mode")) {
             char const* label = argv[++i];
             int j;
             for (j = 0; MODE_TABLE[j].label; ++j) {
@@ -734,8 +730,7 @@ int main(int argc, char const* argv[])
             args.pseudo_c1 = TDA8425_Pseudo_C1_Table[preset];
             args.pseudo_c2 = TDA8425_Pseudo_C2_Table[preset];
         }
-        else if (!strcmp(argv[i], "-r") ||
-            !strcmp(argv[i], "--rate")) {
+        else if (!strcmp(argv[i], "-r") || !strcmp(argv[i], "--rate")) {
             args.rate = (TDA8425_Float)atof(argv[++i]);
             if (args.rate < 1) {
                 fprintf(stderr, "Invalid rate: %s", argv[i]);
@@ -761,8 +756,7 @@ int main(int argc, char const* argv[])
             }
             args.regs[r] = (TDA8425_Register)value;
         }
-        else if (!strcmp(argv[i], "-s") ||
-            !strcmp(argv[i], "--selector")) {
+        else if (!strcmp(argv[i], "-s") || !strcmp(argv[i], "--selector")) {
             char const* label = argv[++i];
             int j;
             for (j = 0; SELECTOR_TABLE[j].label; ++j) {
@@ -777,8 +771,7 @@ int main(int argc, char const* argv[])
                 return 1;
             }
         }
-        else if (!strcmp(argv[i], "-t") ||
-            !strcmp(argv[i], "--treble")) {
+        else if (!strcmp(argv[i], "-t") || !strcmp(argv[i], "--treble")) {
             long db = strtol(argv[++i], NULL, 10);
             int j;
             for (j = 0; j < TDA8425_Tone_Data_Count; ++j) {
@@ -792,8 +785,7 @@ int main(int argc, char const* argv[])
                 return 1;
             }
         }
-        else if (!strcmp(argv[i], "-v") ||
-            !strcmp(argv[i], "--volume")) {
+        else if (!strcmp(argv[i], "-v") || !strcmp(argv[i], "--volume")) {
             long db = strtol(argv[++i], NULL, 10);
             int j;
             for (j = 0; j < TDA8425_Volume_Data_Count; ++j) {
