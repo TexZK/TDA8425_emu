@@ -42,6 +42,10 @@ extern "C" {
 #define TDA8425_FLOAT double            //!< Floating point data type
 #endif
 
+#ifndef TDA8425_USE_DC_REMOVAL
+#define TDA8425_USE_DC_REMOVAL 1
+#endif
+
 #ifndef TDA8425_USE_TFILTER
 #define TDA8425_USE_TFILTER 1
 #endif
@@ -171,6 +175,7 @@ enum TDA8425_DatasheetSpecifications {
     TDA8425_Switch_Data_Bits  = TDA8425_Reg_SF_Count,
     TDA8425_Switch_Data_Mask  = (1 << TDA8425_Switch_Data_Bits) - 1,
 
+    TDA8425_Lowest_Frequency  =   10,  // [Hz]
     TDA8425_Bass_Frequency    =  300,  // [Hz]
     TDA8425_Treble_Frequency  = 4500,  // [Hz]
     TDA8425_Tfilter_Frequency =  180,  // [Hz]
@@ -258,7 +263,7 @@ void TDA8425_BiQuadState_Clear(
 // ----------------------------------------------------------------------------
 
 TDA8425_Float TDA8425_BiQuad_Process(
-    TDA8425_BiQuadModel* model,
+    TDA8425_BiQuadModel const* model,
     TDA8425_BiQuadState* state,
     TDA8425_Float input
 );
@@ -286,6 +291,11 @@ typedef struct TDA8425_BiLinState
 
 // ----------------------------------------------------------------------------
 
+void TDA8425_BiLinModel_SetupDCRemoval(
+    TDA8425_BiLinModel* model,
+    TDA8425_Float sample_rate
+);
+
 void TDA8425_BiLinModel_SetupBass(
     TDA8425_BiLinModel* model,
     TDA8425_Float sample_rate,
@@ -308,12 +318,20 @@ void TDA8425_BiLinState_Clear(
 // ----------------------------------------------------------------------------
 
 TDA8425_Float TDA8425_BiLin_Process(
-    TDA8425_BiLinModel* model,
+    TDA8425_BiLinModel const* model,
     TDA8425_BiLinState* state,
     TDA8425_Float input
 );
 
 // ============================================================================
+
+void TDA8425_DCRemoval_Process(
+    TDA8425_Float stereo[TDA8425_Stereo_Count],
+    TDA8425_BiLinModel const* model,
+    TDA8425_BiLinState state[TDA8425_Stereo_Count]
+);
+
+// ----------------------------------------------------------------------------
 
 void TDA8425_ForcedMono_Process(
     TDA8425_Float stereo[TDA8425_Stereo_Count]
@@ -323,7 +341,7 @@ void TDA8425_ForcedMono_Process(
 
 void TDA8425_PseudoStereo_Process(
     TDA8425_Float stereo[TDA8425_Stereo_Count],
-    TDA8425_BiQuadModel* model,
+    TDA8425_BiQuadModel const* model,
     TDA8425_BiQuadState* state
 );
 
@@ -347,6 +365,11 @@ typedef struct TDA8425_ChipFloat
     TDA8425_Mode mode_;
     TDA8425_Float sample_rate_;
     TDA8425_Float volume_[TDA8425_Stereo_Count];
+
+#if TDA8425_USE_DC_REMOVAL
+    TDA8425_BiLinModel dcremoval_model_;
+    TDA8425_BiLinState dcremoval_state_[TDA8425_Stereo_Count];
+#endif  // TDA8425_USE_DC_REMOVAL
 
     TDA8425_BiQuadModel pseudo_model_;
     TDA8425_BiQuadState pseudo_state_;

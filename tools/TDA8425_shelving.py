@@ -30,7 +30,8 @@ init_printing(use_latex='mathjax')
 
 #%%
 
-MODE = 'bass'
+MODE = 'dc_removal'
+# MODE = 'bass'
 # MODE = 'treble'
 
 PLOT_PHASE = False
@@ -42,7 +43,9 @@ s, z, w, g, k = symbols('s z w g k')
 w1 = w / g
 w2 = w * g
 
-if MODE == 'bass':
+if MODE == 'dc_removal':
+    Hs = s / (s + w)
+elif MODE == 'bass':
     Hs = (s + w2) / (s + w1)
 elif MODE == 'treble':
     Hs = w2/w1 * (s + w1) / (s + w2)
@@ -72,13 +75,21 @@ for i, x in enumerate(b):
 
 #%%
 
-dbs = list(range(-12, 12 + 1, 3))
 Fs = 48000
-if MODE == 'bass':
+dtype = np.float64
+
+if MODE == 'dc_removal':
+    Fc = 10
+    dbs = [0]
+
+elif MODE == 'bass':
     Fc = 300
+    dbs = list(range(-12, 15 + 1, 3))
+
 elif MODE == 'treble':
     Fc = 4500
-dtype = np.float64
+    dbs = list(range(-12, 12 + 1, 3))
+
 
 f = np.logspace(np.log10(20), np.log10(20000), 100)
 plt.close('all')

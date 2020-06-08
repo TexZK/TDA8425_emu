@@ -29,18 +29,18 @@ into your project.
 
 The engine implements the following conceptual flow:
 
-1. **TDA84525_Chip** memory allocation.
-2. Call **TDA84525_Chip_Ctor()** to invalidate internal data.
-3. Call **TDA84525_Chip_Setup()** to initialize static settings.
-4. Call **TDA84525_Chip_Reset()** to clear emulated registers.
-5. Call **TDA84525_Chip_Write()** for each register to inizialize.
-6. Call **TDA84525_Chip_Start()** to start the algorithms.
+1. `TDA84525_Chip` memory allocation.
+2. Call `TDA84525_Chip_Ctor()` to invalidate internal data.
+3. Call `TDA84525_Chip_Setup()` to initialize static settings.
+4. Call `TDA84525_Chip_Reset()` to clear emulated registers.
+5. Call `TDA84525_Chip_Write()` for each register to inizialize.
+6. Call `TDA84525_Chip_Start()` to start the algorithms.
 7. Processing loop:
-    1. Call **TDA84525_Chip_Process()** for each sample, with appropriate data
+    1. Call `TDA84525_Chip_Process()` for each sample, with appropriate data
        types.
-8. Call **TDA84525_Chip_Stop()** to stop the algorithms.
-9. Call **TDA84525_Chip_Dtor()** to deallocate and invalidate internal data.
-10. **TDA84525_Chip** memory deallocation.
+8. Call `TDA84525_Chip_Stop()` to stop the algorithms.
+9. Call `TDA84525_Chip_Dtor()` to deallocate and invalidate internal data.
+10. `TDA84525_Chip` memory deallocation.
 
 Register access timings are not emulated.
 
@@ -54,12 +54,10 @@ _______________________________________________________________________________
 Here you can find some descriptions and discussions about implementation
 details.
 
-
 ### Language
 
 I chose *C99*, because I find good old and mature C to be the best for such a
 tiny library. C is also easier to integrate with other languages.
-
 
 ### Cross-platform support
 
@@ -70,20 +68,37 @@ Currently the library is developed and tested under *Windows* with *MSVC++14*.
 Of course, I will at least provide support for *gcc* and *clang* under *Linux*.
 I do not have access to *macOS*, but I guess the *Linux* support should fit.
 
-
 ### Code style
 
 I chose the path of verbosity for variable declaration, to help debugging fixed
 point math and buffering. Indeed, when compiled for performance, all those
 variable declarations get optimized away easily.
 
-
 ### Input selector
 
 The input selector simply chooses which channels to feed to the internal
 processing units.
 
-The *Process()* method is always provided with two stereo sources.
+The `TDA8425_Chip_Process()` method is always provided with two stereo sources.
+
+### DC removal
+
+The librar can optionally apply a high-pass filter at 10 Hz to the input, in
+order to emulate the DC removal shown in the frequency response charts.
+
+It is activated by the `TDA8425_USE_DC_REMOVAL` preprocessor symbol.
+
+### Filter model cache
+
+Although rare, it might be possible to continuously change bass and treble
+gains. This would recompute filter coefficients each time.
+
+In order to speed up processing, the `TDA8425_USE_MODEL_CACHE` preprocessor
+symbol lets precompute all the possible models at the specified sample rate,
+within `TDA84525_Chip_Setup()`.
+This way, changing gains means to simply switch to another precomputed model.
+
+This option is disabled by default.
 
 _______________________________________________________________________________
 
@@ -104,7 +119,6 @@ channel:
 ### Linear stereo
 
 The *linear stereo* mode does not alter the two input channels.
-
 
 ### Pseudo stereo
 
@@ -129,7 +143,6 @@ The filter as a whole is implemented as a *biquad* filter.
 ![Pseudo stereo schematic highlight](doc/TDA8425_pseudo.png)
 
 ![Pseudo stereo phase diagram](doc/pseudo_phase.png)
-
 
 ### Spatial stereo
 
@@ -166,6 +179,7 @@ Furthermore, it looks like the *T-filter* has an additional second-order
 frequency response for bass control, which is factored into a dedicated biquad
 filter. You can refer to the
 [TDA8425_tfilter.py](tools/TDA8425_tfilter.py) Python script for reference.
+The *T-filter* is activated by the `TDA8425_USE_TFILTER` preprocessor symbol.
 
 ![Tone control frequen response](doc/tone_control.png)
 
