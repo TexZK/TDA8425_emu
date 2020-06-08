@@ -29,18 +29,18 @@ into your project.
 
 The engine implements the following conceptual flow:
 
-1. `TDA84525_Chip` memory allocation.
-2. Call `TDA84525_Chip_Ctor()` to invalidate internal data.
-3. Call `TDA84525_Chip_Setup()` to initialize static settings.
-4. Call `TDA84525_Chip_Reset()` to clear emulated registers.
-5. Call `TDA84525_Chip_Write()` for each register to inizialize.
-6. Call `TDA84525_Chip_Start()` to start the algorithms.
+1. `TDA8425_Chip` memory allocation.
+2. Call `TDA8425_Chip_Ctor()` to invalidate internal data.
+3. Call `TDA8425_Chip_Setup()` to initialize static settings.
+4. Call `TDA8425_Chip_Reset()` to clear emulated registers.
+5. Call `TDA8425_Chip_Write()` for each register to inizialize.
+6. Call `TDA8425_Chip_Start()` to start the algorithms.
 7. Processing loop:
-    1. Call `TDA84525_Chip_Process()` for each sample, with appropriate data
+    1. Call `TDA8425_Chip_Process()` for each sample, with appropriate data
        types.
-8. Call `TDA84525_Chip_Stop()` to stop the algorithms.
-9. Call `TDA84525_Chip_Dtor()` to deallocate and invalidate internal data.
-10. `TDA84525_Chip` memory deallocation.
+8. Call `TDA8425_Chip_Stop()` to stop the algorithms.
+9. Call `TDA8425_Chip_Dtor()` to deallocate and invalidate internal data.
+10. `TDA8425_Chip` memory deallocation.
 
 Register access timings are not emulated.
 
@@ -95,7 +95,7 @@ gains. This would recompute filter coefficients each time.
 
 In order to speed up processing, the `TDA8425_USE_MODEL_CACHE` preprocessor
 symbol lets precompute all the possible models at the specified sample rate,
-within `TDA84525_Chip_Setup()`.
+within `TDA8425_Chip_Setup()`.
 This way, changing gains means to simply switch to another precomputed model.
 
 This option is disabled by default.
