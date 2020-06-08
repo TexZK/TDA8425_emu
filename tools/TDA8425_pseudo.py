@@ -87,6 +87,8 @@ ax2.set_ylim(-400, 0)
 ax2.set_ylabel('phase [°]', color='g')
 ax2.grid(True, which='both')
 
+#%%
+
 for i, (c1, c2) in enumerate(caps):
     values = {
         'C1': c1,
@@ -105,6 +107,29 @@ for i, (c1, c2) in enumerate(caps):
 
     angles = np.unwrap(np.angle(y)) * (180/np.pi)
     ax2.plot(x, angles, label=f'{i+1}')
+
+#%%
+
+if 0:  # PCem
+    ak = np.array([
+        +1.00000000000000000000,
+        -1.98733021473466760000,
+        +0.98738361004063568000,
+    ], dtype=dtype)
+    bk = np.array([
+        +0.00001409030866231767,
+        +0.00002818061732463533,
+        +0.00001409030866231767,
+    ], dtype=dtype)
+    x, y = freqz(bk, a=ak, worN=f, fs=Fs)
+
+    # mags = 20*np.log10(np.abs(y))
+    # ax1.plot(x, mags)
+
+    angles = np.unwrap(np.angle(y)) * (180/np.pi)
+    ax2.plot(x, angles, label=f'PCem')
+
+#%%
 
 plt.legend()
 plt.show()

@@ -30,13 +30,22 @@ init_printing(use_latex='mathjax')
 
 #%%
 
+MODE = 'bass'
+# MODE = 'treble'
+
+PLOT_PHASE = False
+
+#%%
+
 s, z, w, g, k = symbols('s z w g k')
 
 w1 = w / g
 w2 = w * g
 
-Hs = (s + w2) / (s + w1)  # bass
-# Hs = w2/w1 * (s + w1) / (s + w2)  # treble
+if MODE == 'bass':
+    Hs = (s + w2) / (s + w1)
+elif MODE == 'treble':
+    Hs = w2/w1 * (s + w1) / (s + w2)
 spprint('H(s):', Hs)
 
 Hz = Hs.subs(s, (1/k * (z - 1) / (z + 1)))
@@ -65,11 +74,14 @@ for i, x in enumerate(b):
 
 dbs = list(range(-12, 12 + 1, 3))
 Fs = 48000
-Fc = 300  # bass
-# Fc = 4500  # treble
+if MODE == 'bass':
+    Fc = 300
+elif MODE == 'treble':
+    Fc = 4500
 dtype = np.float64
 
-f = np.logspace(np.log10(20), np.log10(20000))
+f = np.logspace(np.log10(20), np.log10(20000), 100)
+plt.close('all')
 fig, ax1 = plt.subplots()
 plt.title('Tone control')
 plt.xscale('log')
@@ -80,9 +92,12 @@ ax1.set_ylim(-20, 20)
 ax1.set_ylabel('gain [dB]', color='b')
 ax1.grid(True, which='both')
 
-ax2 = ax1.twinx()
-ax2.set_ylim(-90, 90)
-ax2.set_ylabel('phase [°]', color='g')
+if PLOT_PHASE:
+    ax2 = ax1.twinx()
+    ax2.set_ylim(-90, 90)
+    ax2.set_ylabel('phase [°]', color='g')
+
+#%%
 
 for db in dbs:
     values = {
@@ -98,7 +113,148 @@ for db in dbs:
     mags = 20*np.log10(np.abs(y))
     ax1.plot(x, mags, 'b')
 
-    # angles = np.unwrap(np.angle(y)) * (180/np.pi)
-    # ax2.plot(x, angles, 'g')
+    if PLOT_PHASE:
+        angles = np.unwrap(np.angle(y)) * (180/np.pi)
+        ax2.plot(x, angles, 'g')
+
+#%% PCem
+if 0:
+    bass_attenuation = [
+            1.995,
+            1.995,
+            1.995,
+            1.413,
+            1.000,
+            0.708,
+            0.000,
+            0.708,
+            1.000,
+            1.413,
+            1.995,
+            2.819,
+            2.819,
+            2.819,
+            2.819,
+            2.819,
+    ]
+
+    bass_cut = [
+            0.126,
+            0.126,
+            0.126,
+            0.178,
+            0.251,
+            0.354,
+    ]
+
+    treble_attenuation = [
+            1.995,
+            1.995,
+            1.995,
+            1.413,
+            1.000,
+            0.708,
+            0.000,
+            0.708,
+            1.000,
+            1.413,
+            1.995,
+            1.995,
+            1.995,
+            1.995,
+            1.995,
+            1.995,
+    ]
+
+    treble_cut = [
+            0.126,
+            0.126,
+            0.126,
+            0.178,
+            0.251,
+            0.354,
+    ]
+
+    lowpass_a = np.array([
+        +1.00000000000000000000,
+        -1.97223372919526560000,
+        +0.97261396931306277000,
+    ])
+
+    lowpass_b = np.array([
+        +0.00009159473951071446,
+        +0.00018318947902142891,
+        +0.00009159473951071446,
+    ])
+
+    highpass_a = np.array([
+        +1.00000000000000000000,
+        -1.97223372919758360000,
+        +0.97261396931534050000,
+    ])
+
+    highpass_b = np.array([
+        +0.98657437157334349000,
+        -1.97314874314668700000,
+        +0.98657437157334349000,
+    ])
+
+    # {{{
+    # temp = ((int32_t)adgold_buffer[c] * adgold->vol_l) >> 17;
+    # lowpass = adgold_lowpass_iir(0, temp);
+    # highpass = adgold_highpass_iir(0, temp);
+    # if (adgold->bass > 6)
+    #         temp += (lowpass * bass_attenuation[adgold->bass]) >> 14;
+    # else if (adgold->bass < 6)
+    #         temp = highpass + ((temp * bass_cut[adgold->bass]) >> 14);
+    # if (adgold->treble > 6)
+    #         temp += (highpass * treble_attenuation[adgold->treble]) >> 14;
+    # else if (adgold->treble < 6)
+    #         temp = lowpass + ((temp * treble_cut[adgold->treble]) >> 14);
+    # }}}
+
+    for i in range(16):
+        ak = 1.0
+        bk = 1.0
+
+        if MODE == 'bass':
+            if i > 6:
+                ak *= np.array(lowpass_a)
+                bk *= np.array(lowpass_b)
+            elif i < 6:
+                ak *= np.array(highpass_a)
+                bk *= np.array(highpass_b)
+
+        elif MODE == 'treble':
+            if i > 6:
+                ak *= np.array(highpass_a)
+                bk *= np.array(highpass_b)
+            elif i < 6:
+                ak *= np.array(lowpass_a)
+                bk *= np.array(lowpass_b)
+
+        ak = np.array(ak, dtype=dtype)
+        bk = np.array(bk, dtype=dtype)
+        x, y = freqz(bk, a=ak, worN=f, fs=Fs)
+
+        mags = np.abs(y)
+
+        if MODE == 'bass':
+            if i > 6:
+                mags = 1 + mags * bass_attenuation[i]
+            elif i < 6:
+                mags = mags + bass_cut[i]
+
+        elif MODE == 'treble':
+            if i > 6:
+                mags = 1 + mags * treble_attenuation[i]
+            elif i < 6:
+                mags = mags + treble_cut[i]
+
+        mags *= 0.5
+        mags = 20*np.log10(mags)
+        ax1.plot(x, mags, 'r')
+
+#%%
 
 plt.show()

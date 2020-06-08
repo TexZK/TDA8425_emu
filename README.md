@@ -29,17 +29,18 @@ into your project.
 
 The engine implements the following conceptual flow:
 
-1. Chip memory allocation.
-2. Call **Ctor()** to invalidate internal data.
-3. Call **Setup()** to initialize static settings.
-4. Call **Reset()** to clear emulated registers.
-5. Call **Write()** for each register to inizialize.
-6. Call **Start()** to start the algorithms.
+1. **TDA84525_Chip** memory allocation.
+2. Call **TDA84525_Chip_Ctor()** to invalidate internal data.
+3. Call **TDA84525_Chip_Setup()** to initialize static settings.
+4. Call **TDA84525_Chip_Reset()** to clear emulated registers.
+5. Call **TDA84525_Chip_Write()** for each register to inizialize.
+6. Call **TDA84525_Chip_Start()** to start the algorithms.
 7. Processing loop:
-    1. Call **Process()** for each sample, with appropriate data types.
-8. Call **Stop()** to stop the algorithms.
-9. Call **Dtor()** to deallocate and invalidate internal data.
-10. Chip memory deallocation.
+    1. Call **TDA84525_Chip_Process()** for each sample, with appropriate data
+       types.
+8. Call **TDA84525_Chip_Stop()** to stop the algorithms.
+9. Call **TDA84525_Chip_Dtor()** to deallocate and invalidate internal data.
+10. **TDA84525_Chip** memory deallocation.
 
 Register access timings are not emulated.
 
