@@ -46,6 +46,10 @@ extern "C" {
 #define TDA8425_USE_TFILTER 1
 #endif
 
+#ifndef TDA8425_USE_MODEL_CACHE
+#define TDA8425_USE_MODEL_CACHE 0
+#endif
+
 // ============================================================================
 
 #define TDA8425_VERSION "0.1.0"
@@ -358,6 +362,14 @@ typedef struct TDA8425_ChipFloat
     TDA8425_BiQuadModel tfilter_model_;
     TDA8425_BiQuadState tfilter_state_[TDA8425_Stereo_Count];
 #endif  // TDA8425_USE_TFILTER
+
+#if TDA8425_USE_MODEL_CACHE
+    TDA8425_BiLinModel bass_model_cache_[TDA8425_Tone_Data_Count];
+#if TDA8425_USE_TFILTER
+    TDA8425_BiQuadModel tfilter_model_cache_[TDA8425_Tone_Data_Count];
+#endif  // TDA8425_USE_TFILTER
+    TDA8425_BiLinModel treble_model_cache_[TDA8425_Tone_Data_Count];
+#endif  // TDA8425_USE_MODEL_CACHE
 } TDA8425_Chip;
 
 typedef struct TDA8425_Chip_Process_Data

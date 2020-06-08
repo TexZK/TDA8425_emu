@@ -558,6 +558,34 @@ void TDA8425_Chip_Setup(
         pseudo_c2
     );
 
+#if TDA8425_USE_MODEL_CACHE
+    for (TDA8425_Register i = 0; i < TDA8425_Tone_Data_Count; ++i) {
+        TDA8425_Float bass_gain = TDA8425_RegisterToBass(i);
+
+        TDA8425_BiLinModel_SetupBass(
+            &self->bass_model_cache_[i],
+            self->sample_rate_,
+            bass_gain
+        );
+
+#if TDA8425_USE_TFILTER
+        TDA8425_BiQuadModel_SetupTfilter(
+            &self->tfilter_model_cache_[i],
+            self->sample_rate_,
+            bass_gain
+        );
+#endif  // TDA8425_USE_TFILTER
+
+        TDA8425_Float treble_gain = TDA8425_RegisterToTreble(i);
+
+        TDA8425_BiLinModel_SetupTreble(
+            &self->treble_model_cache_[i],
+            self->sample_rate_,
+            treble_gain
+        );
+    }
+#endif  // TDA8425_USE_MODEL_CACHE
+
     TDA8425_Chip_Write(self, (TDA8425_Address)TDA8425_Reg_BA, self->reg_ba_);
     TDA8425_Chip_Write(self, (TDA8425_Address)TDA8425_Reg_TR, self->reg_tr_);
 }
@@ -781,6 +809,14 @@ void TDA8425_Chip_Write(
     case TDA8425_Reg_BA:
         data |= (TDA8425_Register)~TDA8425_Tone_Data_Mask;
         self->reg_ba_ = data;
+
+#if TDA8425_USE_MODEL_CACHE
+        data &= (TDA8425_Register)TDA8425_Tone_Data_Mask;
+        self->bass_model_ = self->bass_model_cache_[data];
+#if TDA8425_USE_TFILTER
+        self->tfilter_model_ = self->tfilter_model_cache_[data];
+#endif  // TDA8425_USE_TFILTER
+#else  // TDA8425_USE_MODEL_CACHE
         TDA8425_Float bass_gain = TDA8425_RegisterToBass(data);
 
         TDA8425_BiLinModel_SetupBass(
@@ -798,11 +834,17 @@ void TDA8425_Chip_Write(
             );
         }
 #endif  // TDA8425_USE_TFILTER
+#endif  // TDA8425_USE_MODEL_CACHE
         break;
 
     case TDA8425_Reg_TR:
         data |= (TDA8425_Register)~TDA8425_Tone_Data_Mask;
         self->reg_tr_ = data;
+
+#if TDA8425_USE_MODEL_CACHE
+        data &= (TDA8425_Register)TDA8425_Tone_Data_Mask;
+        self->treble_model_ = self->treble_model_cache_[data];
+#else  // TDA8425_USE_MODEL_CACHE
         TDA8425_Float treble_gain = TDA8425_RegisterToTreble(data);
 
         TDA8425_BiLinModel_SetupTreble(
@@ -810,6 +852,7 @@ void TDA8425_Chip_Write(
             self->sample_rate_,
             treble_gain
         );
+#endif  // TDA8425_USE_MODEL_CACHE
         break;
 
     case TDA8425_Reg_SF:
