@@ -27,6 +27,7 @@ def spprint(name, symbol, plain=False):
 
 init_printing(use_latex='mathjax')
 
+PLOT_MAGNITUDE = False
 
 #%%
 
@@ -72,20 +73,24 @@ r2 = 15000
 dtype = np.float64
 
 f = np.logspace(np.log10(10), np.log10(20000))
-fig, ax1 = plt.subplots()
-plt.title(f'Pseudo-stereo: R1 {r1} Ω & R2 {r2} Ω')
+fig, ax1 = plt.subplots(figsize=(3.7, 3.6))
+plt.title('Pseudo-stereo')
 plt.xscale('log')
 plt.xlabel('frequency [Hz]')
+plt.grid(True, which='both')
 
 ax1.set_xlim(10**1, 10**5)
-ax1.set_ylim(-20, 20)
-ax1.set_ylabel('gain [dB]', color='b')
+ax1.set_ylim(-400, 0)
+ax1.set_ylabel('phase [°]', color='g')
 ax1.grid(True, which='both')
 
-ax2 = ax1.twinx()
-ax2.set_ylim(-400, 0)
-ax2.set_ylabel('phase [°]', color='g')
-ax2.grid(True, which='both')
+if PLOT_MAGNITUDE:
+    ax2 = ax1.twinx()
+    ax2.set_ylim(-20, 20)
+    ax2.set_ylabel('gain [dB]', color='b')
+    ax2.grid(True, which='both')
+
+plt.tight_layout()
 
 #%%
 
@@ -102,32 +107,37 @@ for i, (c1, c2) in enumerate(caps):
     bk = np.array([x.subs(values) for x in b], dtype=dtype)
     x, y = freqz(bk, a=ak, worN=f, fs=Fs)
 
-    # mags = 20*np.log10(np.abs(y))
-    # ax1.plot(x, mags)
-
     angles = np.unwrap(np.angle(y)) * (180/np.pi)
-    ax2.plot(x, angles, label=f'{i+1}')
+    ax1.plot(x, angles, label=f'Preset {i+1}')
+
+    if PLOT_MAGNITUDE:
+        mags = 20*np.log10(np.abs(y))
+        ax2.plot(x, mags)
 
 #%%
 
 if 0:  # PCem
+    # Note: A and B coefficients are swapped in PCem source code
     ak = np.array([
         +1.00000000000000000000,
         -1.98733021473466760000,
         +0.98738361004063568000,
     ], dtype=dtype)
+
     bk = np.array([
         +0.00001409030866231767,
         +0.00002818061732463533,
         +0.00001409030866231767,
     ], dtype=dtype)
-    x, y = freqz(bk, a=ak, worN=f, fs=Fs)
 
-    # mags = 20*np.log10(np.abs(y))
-    # ax1.plot(x, mags)
+    x, y = freqz(bk, a=ak, worN=f, fs=Fs)
 
     angles = np.unwrap(np.angle(y)) * (180/np.pi)
     ax2.plot(x, angles, label=f'PCem')
+
+    if PLOT_MAGNITUDE:
+        mags = 20*np.log10(np.abs(y))
+        ax1.plot(x, mags)
 
 #%%
 

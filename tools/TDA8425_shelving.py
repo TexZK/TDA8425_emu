@@ -131,7 +131,7 @@ dbt = [
 
 f = np.logspace(np.log10(20), np.log10(20000), 100)
 plt.close('all')
-fig, ax1 = plt.subplots(figsize=(7, 2.8))
+fig, ax1 = plt.subplots(figsize=(6.5, 3.2))
 plt.title('Tone control')
 plt.xscale('log')
 plt.xlabel('frequency [Hz]')
@@ -145,6 +145,8 @@ if PLOT_PHASE:
     ax2 = ax1.twinx()
     ax2.set_ylim(-90, 90)
     ax2.set_ylabel('phase [°]', color='g')
+
+plt.tight_layout()
 
 #%%
 

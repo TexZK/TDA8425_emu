@@ -185,7 +185,7 @@ plt.show()
 
 #%%
 
-fig, ax1 = plt.subplots(figsize=(7, 2.8))
+fig, ax1 = plt.subplots(figsize=(6.5, 3.2))
 plt.title('T-filter')
 plt.xscale('log')
 plt.xlabel('frequency [Hz]')
@@ -199,6 +199,8 @@ if PLOT_PHASE:
     ax2 = ax1.twinx()
     ax2.set_ylim(-60, 60)
     ax2.set_ylabel('phase [°]', color='g')
+
+plt.tight_layout()
 
 for i in range(16):
     values = {
