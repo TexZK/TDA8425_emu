@@ -13,7 +13,7 @@ from sympy import denom
 from sympy import Poly
 from sympy import sqrt
 from sympy.codegen.cfunctions import log10
-from sympy import Abs as sabs
+from sympy import Abs
 from sympy import cos
 from sympy import sin
 from sympy import pi
@@ -36,28 +36,46 @@ init_printing(use_latex='mathjax')
 
 #%%
 
-s, z, w, g, k, wb, wt = symbols('s z w g k wb wt')
+MODE = {
+    'dc_removal',
+    'resonance',
+    'bass',
+    'treble',
+}
 
-# D = sqrt(2)
-# M = 0.8
-# p1 = -w/g*D + 1j*w/g*D - 1j*w*(1/g-1)*D*M
-# p2 = -w/g*D - 1j*w/g*D + 1j*w*(1/g-1)*D*M
-# z1 = -w*g*D + 1j*w*g*D - 1j*w*(g-1)*D*M
-# z2 = -w*g*D - 1j*w*g*D + 1j*w*(g-1)*D*M
+PLOT_PHASE = False
 
-r = sqrt(1/sabs(20*log10(g)))
-gn = log10(g)*0.85
-ph = pi*(3/4)
-p1 = r*w * (cos(ph - gn) + 1j*sin(ph - gn))
-p2 = r*w * (cos(ph - gn) - 1j*sin(ph - gn))
-z1 = r*w * (cos(ph + gn) + 1j*sin(ph + gn))
-z2 = r*w * (cos(ph + gn) - 1j*sin(ph + gn))
+#%%
+
+s, z, gb, gt, k, wd, wr, wb, wt = symbols('s z gb gt k wd wr wb wt')
+
+gg = log10(sqrt(gb))
+r = sqrt(1 / Abs(20 * gg))
+gn = gg * 0.85
+ph = pi * 3/4
+p1 = r*wr * (cos(ph - gn) + sin(ph - gn)*1j)
+p2 = r*wr * (cos(ph - gn) - sin(ph - gn)*1j)
+z1 = r*wr * (cos(ph + gn) + sin(ph + gn)*1j)
+z2 = r*wr * (cos(ph + gn) - sin(ph + gn)*1j)
 
 Hs = 1
-Hs = Hs * ((s - z1) * (s - z2)) / ((s - p1) * (s - p2))  # resonance
-# Hs = Hs * s / (s + 2*pi*12)  # DC removal
-# Hs = Hs * (s + wb*g) / (s + wb/g)  # basic bass
-# Hs = Hs * g*g * (s + wt/g) / (s + wt*g)  # basic treble
+
+if 'dc_removal' in MODE:
+    Hs *= s / (s + wd)
+
+if 'resonance' in MODE:
+    Hs *= ((s - z1) * (s - z2)) / ((s - p1) * (s - p2))
+
+if 'bass' in MODE:
+    w1 = wb / sqrt(gb)
+    w2 = wb * sqrt(gb)
+    Hs *= (s + w2) / (s + w1)
+
+if 'treble' in MODE:
+    w1 = wt / sqrt(gt)
+    w2 = wt * sqrt(gt)
+    Hs *= w2/w1 * (s + w1) / (s + w2)
+
 spprint('H(s):', Hs)
 
 Hz = Hs.subs(s, (1/k * (z - 1) / (z + 1)))
@@ -84,25 +102,73 @@ for i, x in enumerate(b):
 
 #%%
 
-dbs = list(range(-12, 15 + 1, 3))
-Fs = 48000
-Fc = 180
 dtype = np.float64
+Fs = 48000  # [Hz]
 
+fd = 10  # [Hz]
+
+fr = 180  # [Hz]
+fb = 300  # [Hz]
+dbb = [
+    -12,
+    -12,
+    -12,
+    - 9,
+    - 6,
+    - 3,
+      0,
+    + 3,
+    + 6,
+    + 9,
+    +12,
+    +15,
+    +15,
+    +15,
+    +15,
+    +15,
+]
+
+ft = 4500  # [Hz]
+dbt = [
+    -12,
+    -12,
+    -12,
+    - 9,
+    - 6,
+    - 3,
+      0,
+    + 3,
+    + 6,
+    + 9,
+    +12,
+    +12,
+    +12,
+    +12,
+    +12,
+    +12,
+]
+
+f = np.logspace(np.log10(20), np.log10(20000), 1000)
 plt.close('all')
+
+#%%
+
+plt.figure(figsize=(6, 6))
 plt.xlabel('Re [rad/s]')
 plt.ylabel('Im [rad/s]')
 plt.grid(True)
 plt.plot([-1000, +1000], [+1000, -1000], color='k')
 plt.plot([-1000, +1000], [-1000, +1000], color='k')
 
-for db in dbs:
+for i in range(16):
     values = {
-        'w': 2*np.pi * Fc,
-        'wb': 2*np.pi * 300,
-        'wt': 2*np.pi * 4500,
+        'wd': 2*np.pi * fd,
+        'wr': 2*np.pi * fr,
+        'wb': 2*np.pi * fb,
+        'wt': 2*np.pi * ft,
         'k': 0.5 / Fs,
-        'g': np.sqrt(10**(db / 20)),
+        'gb': 10**(dbb[i] / 20),
+        'gt': 10**(dbt[i] / 20),
     }
 
     pc1 = complex(p1.subs(values))
@@ -119,10 +185,8 @@ plt.show()
 
 #%%
 
-f = np.logspace(np.log10(20), np.log10(20000), 1000)
-# plt.close('all')
-fig, ax1 = plt.subplots()
-plt.title('T-filter resonance')
+fig, ax1 = plt.subplots(figsize=(7, 2.8))
+plt.title('T-filter')
 plt.xscale('log')
 plt.xlabel('frequency [Hz]')
 
@@ -131,17 +195,20 @@ ax1.set_ylim(-20, 20)
 ax1.set_ylabel('gain [dB]', color='b')
 ax1.grid(True, which='both')
 
-ax2 = ax1.twinx()
-ax2.set_ylim(-60, 60)
-ax2.set_ylabel('phase [°]', color='g')
+if PLOT_PHASE:
+    ax2 = ax1.twinx()
+    ax2.set_ylim(-60, 60)
+    ax2.set_ylabel('phase [°]', color='g')
 
-for db in dbs:
+for i in range(16):
     values = {
-        'w': 2*np.pi * Fc,
-        'wb': 2*np.pi * 300,
-        'wt': 2*np.pi * 4500,
+        'wd': 2*np.pi * fd,
+        'wr': 2*np.pi * fr,
+        'wb': 2*np.pi * fb,
+        'wt': 2*np.pi * ft,
         'k': 0.5 / Fs,
-        'g': np.sqrt(10**(db / 20)),
+        'gb': 10**(dbb[i] / 20),
+        'gt': 10**(dbt[i] / 20),
     }
 
     ak = np.array([x.subs(values) for x in a], dtype=dtype)
@@ -151,7 +218,10 @@ for db in dbs:
     mags = 20*np.log10(np.abs(y))
     ax1.plot(x, mags, 'b')
 
-    # angles = np.unwrap(np.angle(y)) * (180/np.pi)
-    # ax2.plot(x, angles, 'g')
+    if PLOT_PHASE:
+        angles = np.unwrap(np.angle(y)) * (180/np.pi)
+        ax2.plot(x, angles, 'g')
+
+#%%
 
 plt.show()

@@ -83,7 +83,7 @@ The `TDA8425_Chip_Process()` method is always provided with two stereo sources.
 
 ### DC removal
 
-The librar can optionally apply a high-pass filter at 10 Hz to the input, in
+The library can optionally apply a high-pass filter at 10 Hz to the inputs, in
 order to emulate the DC removal shown in the frequency response charts.
 
 It is activated by the `TDA8425_USE_DC_REMOVAL` preprocessor symbol.
@@ -181,7 +181,9 @@ filter. You can refer to the
 [TDA8425_tfilter.py](tools/TDA8425_tfilter.py) Python script for reference.
 The *T-filter* is activated by the `TDA8425_USE_TFILTER` preprocessor symbol.
 
-![Tone control frequen response](doc/tone_control.png)
+![Tone control "specified" frequency response](doc/tone_control_specified.png)
+
+![Tone control "T-filter" frequency response](doc/tone_control_t-filter.png)
 
 _______________________________________________________________________________
 

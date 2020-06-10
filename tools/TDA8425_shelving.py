@@ -10,6 +10,7 @@ from sympy import collect
 from sympy import expand
 from sympy import numer
 from sympy import denom
+from sympy import sqrt
 from sympy import Poly
 
 
@@ -30,25 +31,32 @@ init_printing(use_latex='mathjax')
 
 #%%
 
-MODE = 'dc_removal'
-# MODE = 'bass'
-# MODE = 'treble'
+MODE = {
+    'dc_removal',
+    'bass',
+    'treble',
+}
 
 PLOT_PHASE = False
 
 #%%
 
-s, z, w, g, k = symbols('s z w g k')
+s, z, wd, wb, wt, gb, gt, k = symbols('s z wd wb wt gb gt k')
+Hs = 1
 
-w1 = w / g
-w2 = w * g
+if 'dc_removal' in MODE:
+    Hs *= s / (s + wd)
 
-if MODE == 'dc_removal':
-    Hs = s / (s + w)
-elif MODE == 'bass':
-    Hs = (s + w2) / (s + w1)
-elif MODE == 'treble':
-    Hs = w2/w1 * (s + w1) / (s + w2)
+if 'bass' in MODE:
+    w1 = wb / sqrt(gb)
+    w2 = wb * sqrt(gb)
+    Hs *= (s + w2) / (s + w1)
+
+if 'treble' in MODE:
+    w1 = wt / sqrt(gt)
+    w2 = wt * sqrt(gt)
+    Hs *= w2/w1 * (s + w1) / (s + w2)
+
 spprint('H(s):', Hs)
 
 Hz = Hs.subs(s, (1/k * (z - 1) / (z + 1)))
@@ -75,25 +83,55 @@ for i, x in enumerate(b):
 
 #%%
 
-Fs = 48000
 dtype = np.float64
+Fs = 48000  # [Hz]
 
-if MODE == 'dc_removal':
-    Fc = 10
-    dbs = [0]
+fd = 10  # [Hz]
 
-elif MODE == 'bass':
-    Fc = 300
-    dbs = list(range(-12, 15 + 1, 3))
+fb = 300  # [Hz]
+dbb = [
+    -12,
+    -12,
+    -12,
+    - 9,
+    - 6,
+    - 3,
+      0,
+    + 3,
+    + 6,
+    + 9,
+    +12,
+    +15,
+    +15,
+    +15,
+    +15,
+    +15,
+]
 
-elif MODE == 'treble':
-    Fc = 4500
-    dbs = list(range(-12, 12 + 1, 3))
+ft = 4500  # [Hz]
+dbt = [
+    -12,
+    -12,
+    -12,
+    - 9,
+    - 6,
+    - 3,
+      0,
+    + 3,
+    + 6,
+    + 9,
+    +12,
+    +12,
+    +12,
+    +12,
+    +12,
+    +12,
+]
 
 
 f = np.logspace(np.log10(20), np.log10(20000), 100)
 plt.close('all')
-fig, ax1 = plt.subplots()
+fig, ax1 = plt.subplots(figsize=(7, 2.8))
 plt.title('Tone control')
 plt.xscale('log')
 plt.xlabel('frequency [Hz]')
@@ -110,11 +148,14 @@ if PLOT_PHASE:
 
 #%%
 
-for db in dbs:
+for i in range(16):
     values = {
-        'w': 2*np.pi * Fc,
         'k': 0.5 / Fs,
-        'g': np.sqrt(10**(db / 20)),
+        'gb': 10**(dbb[i] / 20),
+        'gt': 10**(dbt[i] / 20),
+        'wd': 2*np.pi * fd,
+        'wb': 2*np.pi * fb,
+        'wt': 2*np.pi * ft,
     }
 
     ak = np.array([x.subs(values) for x in a], dtype=dtype)
@@ -186,6 +227,8 @@ if 0:
             0.354,
     ]
 
+    # Note: A and B coefficients are swapped in PCem source code
+
     lowpass_a = np.array([
         +1.00000000000000000000,
         -1.97223372919526560000,
@@ -224,47 +267,57 @@ if 0:
     #         temp = lowpass + ((temp * treble_cut[adgold->treble]) >> 14);
     # }}}
 
-    for i in range(16):
-        ak = 1.0
-        bk = 1.0
+    for mode in MODE:
+        for i in range(16):
+            ak = 1.0
+            bk = 1.0
 
-        if MODE == 'bass':
-            if i > 6:
-                ak *= np.array(lowpass_a)
-                bk *= np.array(lowpass_b)
-            elif i < 6:
-                ak *= np.array(highpass_a)
-                bk *= np.array(highpass_b)
+            if mode == 'bass':
+                if i > 6:
+                    ak *= np.array(lowpass_a)
+                    bk *= np.array(lowpass_b)
+                elif i < 6:
+                    ak *= np.array(highpass_a)
+                    bk *= np.array(highpass_b)
 
-        elif MODE == 'treble':
-            if i > 6:
-                ak *= np.array(highpass_a)
-                bk *= np.array(highpass_b)
-            elif i < 6:
-                ak *= np.array(lowpass_a)
-                bk *= np.array(lowpass_b)
+            elif mode == 'treble':
+                if i > 6:
+                    ak *= np.array(highpass_a)
+                    bk *= np.array(highpass_b)
+                elif i < 6:
+                    ak *= np.array(lowpass_a)
+                    bk *= np.array(lowpass_b)
 
-        ak = np.array(ak, dtype=dtype)
-        bk = np.array(bk, dtype=dtype)
-        x, y = freqz(bk, a=ak, worN=f, fs=Fs)
+            ak = np.array(ak, dtype=dtype)
+            bk = np.array(bk, dtype=dtype)
+            x, y = freqz(bk, a=ak, worN=f, fs=Fs)
 
-        mags = np.abs(y)
+            if mode == 'bass':
+                if i > 6:
+                    # H(z) = LPF(z)*att + 1 = (bk*att + ak)/ak
+                    bk = bk*bass_attenuation[i] + ak
+                elif i < 6:
+                    # H(z) = HPF(z) + cut = (bk + ak*cut)/ak
+                    bk = bk + ak*bass_cut[i]
 
-        if MODE == 'bass':
-            if i > 6:
-                mags = 1 + mags * bass_attenuation[i]
-            elif i < 6:
-                mags = mags + bass_cut[i]
+            elif mode == 'treble':
+                if i > 6:
+                    # H(z) = HPF(z)*att + 1 = (bk*att + ak)/ak
+                    bk = bk*treble_attenuation[i] + ak
+                elif i < 6:
+                    # H(z) = LPF(z) + cut = (bk + ak*cut)/ak
+                    bk = bk + ak*treble_cut[i]
 
-        elif MODE == 'treble':
-            if i > 6:
-                mags = 1 + mags * treble_attenuation[i]
-            elif i < 6:
-                mags = mags + treble_cut[i]
+            x, y = freqz(bk, a=ak, worN=f, fs=Fs)
+            mags = np.abs(y)
 
-        mags *= 0.5
-        mags = 20*np.log10(mags)
-        ax1.plot(x, mags, 'r')
+            mags *= 0.5
+            mags = 20*np.log10(mags)
+            ax1.plot(x, mags, 'r')
+
+            if PLOT_PHASE:
+                angles = np.unwrap(np.angle(y)) * (180/np.pi)
+                ax2.plot(x, angles, 'y')
 
 #%%
 
