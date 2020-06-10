@@ -185,7 +185,7 @@ plt.show()
 
 #%%
 
-fig, ax1 = plt.subplots(figsize=(6.5, 3.2))
+fig, ax1 = plt.subplots(figsize=(6.5, 3.25))
 plt.title('T-filter')
 plt.xscale('log')
 plt.xlabel('frequency [Hz]')

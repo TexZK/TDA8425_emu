@@ -131,7 +131,7 @@ dbt = [
 
 f = np.logspace(np.log10(20), np.log10(20000), 100)
 plt.close('all')
-fig, ax1 = plt.subplots(figsize=(6.5, 3.2))
+fig, ax1 = plt.subplots(figsize=(6.5, 3.25))
 plt.title('Tone control')
 plt.xscale('log')
 plt.xlabel('frequency [Hz]')
