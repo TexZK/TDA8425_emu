@@ -647,7 +647,7 @@ int main(int argc, char const* argv[])
 
         // Binary arguments
         if (i >= argc - 1) {
-            fprintf(stderr, "Expecting binary argument: %s", argv[i]);
+            fprintf(stderr, "Expecting binary argument: %s\n", argv[i]);
             return 1;
         }
         else if (!strcmp(argv[i], "-b") || !strcmp(argv[i], "--bass")) {
@@ -660,14 +660,14 @@ int main(int argc, char const* argv[])
                 }
             }
             if (j >= TDA8425_Tone_Data_Count) {
-                fprintf(stderr, "Unsupported bass decibel gain: %s", argv[i]);
+                fprintf(stderr, "Unsupported bass decibel gain: %s\n", argv[i]);
                 return 1;
             }
         }
         else if (!strcmp(argv[i], "-c") || !strcmp(argv[i], "--channels")) {
             args.channels = strtol(argv[++i], NULL, 10);
             if (args.channels < 1) {
-                fprintf(stderr, "Invalid channels: %s", argv[i]);
+                fprintf(stderr, "Invalid channels: %s\n", argv[i]);
                 return 1;
             }
             else if (args.channels > MAX_INPUTS) {
@@ -685,7 +685,7 @@ int main(int argc, char const* argv[])
                 }
             }
             if (!FORMAT_TABLE[j].label) {
-                fprintf(stderr, "Unknown format: %s", label);
+                fprintf(stderr, "Unknown format: %s\n", label);
                 return 1;
             }
         }
@@ -700,14 +700,14 @@ int main(int argc, char const* argv[])
                 }
             }
             if (!MODE_TABLE[j].label) {
-                fprintf(stderr, "Unknown mode: %s", label);
+                fprintf(stderr, "Unknown mode: %s\n", label);
                 return 1;
             }
         }
         else if (!strcmp(argv[i], "--pseudo-c1")) {
             double value = atof(argv[++i]);
             if (value <= 0) {
-                fprintf(stderr, "Invalid capacitance: %s", argv[i]);
+                fprintf(stderr, "Invalid capacitance: %s\n", argv[i]);
                 return 1;
             }
             args.pseudo_c1 = (TDA8425_Float)value;
@@ -715,7 +715,7 @@ int main(int argc, char const* argv[])
         else if (!strcmp(argv[i], "--pseudo-c2")) {
             double value = atof(argv[++i]);
             if (value <= 0) {
-                fprintf(stderr, "Invalid capacitance: %s", argv[i]);
+                fprintf(stderr, "Invalid capacitance: %s\n", argv[i]);
                 return 1;
             }
             args.pseudo_c2 = (TDA8425_Float)value;
@@ -723,7 +723,7 @@ int main(int argc, char const* argv[])
         else if (!strcmp(argv[i], "--pseudo-preset")) {
             long preset = strtol(argv[++i], NULL, 10);
             if (preset < 1 || preset >(long)TDA8425_Pseudo_Preset_Count) {
-                fprintf(stderr, "Invalid pseudo selection: %s", argv[i]);
+                fprintf(stderr, "Invalid pseudo selection: %s\n", argv[i]);
                 return 1;
             }
             --preset;
@@ -733,7 +733,7 @@ int main(int argc, char const* argv[])
         else if (!strcmp(argv[i], "-r") || !strcmp(argv[i], "--rate")) {
             args.rate = (TDA8425_Float)atof(argv[++i]);
             if (args.rate < 1) {
-                fprintf(stderr, "Invalid rate: %s", argv[i]);
+                fprintf(stderr, "Invalid rate: %s\n", argv[i]);
                 return 1;
             }
         }
@@ -746,12 +746,12 @@ int main(int argc, char const* argv[])
                 }
             }
             if (!REGISTER_TABLE[r].label) {
-                fprintf(stderr, "Unknown register: %s", label);
+                fprintf(stderr, "Unknown register: %s\n", label);
                 return 1;
             }
             long value = strtol(argv[++i], NULL, 16);
             if (errno || value < 0x00 || value > 0xFF) {
-                fprintf(stderr, "Invalid register value: %s", argv[i]);
+                fprintf(stderr, "Invalid register value: %s\n", argv[i]);
                 return 1;
             }
             args.regs[r] = (TDA8425_Register)value;
@@ -767,7 +767,7 @@ int main(int argc, char const* argv[])
                 }
             }
             if (!SELECTOR_TABLE[j].label) {
-                fprintf(stderr, "Unknown selector: %s", label);
+                fprintf(stderr, "Unknown selector: %s\n", label);
                 return 1;
             }
         }
@@ -781,7 +781,7 @@ int main(int argc, char const* argv[])
                 }
             }
             if (j >= TDA8425_Tone_Data_Count) {
-                fprintf(stderr, "Unsupported treble decibel gain: %s", argv[i]);
+                fprintf(stderr, "Unsupported treble decibel gain: %s\n", argv[i]);
                 return 1;
             }
         }
@@ -796,7 +796,7 @@ int main(int argc, char const* argv[])
                 }
             }
             if (j >= TDA8425_Volume_Data_Count) {
-                fprintf(stderr, "Unsupported volume decibel gain: %s", argv[i]);
+                fprintf(stderr, "Unsupported volume decibel gain: %s\n", argv[i]);
                 return 1;
             }
         }
@@ -810,7 +810,7 @@ int main(int argc, char const* argv[])
                 }
             }
             if (j >= TDA8425_Volume_Data_Count) {
-                fprintf(stderr, "Unsupported volume decibel gain: %s", argv[i]);
+                fprintf(stderr, "Unsupported volume decibel gain: %s\n", argv[i]);
                 return 1;
             }
         }
@@ -824,12 +824,12 @@ int main(int argc, char const* argv[])
                 }
             }
             if (j >= TDA8425_Volume_Data_Count) {
-                fprintf(stderr, "Unsupported volume decibel gain: %s", argv[i]);
+                fprintf(stderr, "Unsupported volume decibel gain: %s\n", argv[i]);
                 return 1;
             }
         }
         else {
-            fprintf(stderr, "Unknown switch: %s", argv[i]);
+            fprintf(stderr, "Unknown switch: %s\n", argv[i]);
             return 1;
         }
 
