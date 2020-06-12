@@ -74,6 +74,21 @@ I chose the path of verbosity for variable declaration, to help debugging fixed
 point math and buffering. Indeed, when compiled for performance, all those
 variable declarations get optimized away easily.
 
+### Floating-point
+
+It is possible to configure the floating point data type used for processing,
+via the `TDA8425_FLOAT` preprocessor symbol. It defaults to `double`
+(*double precision*).
+
+Please note that, contrary to common beliefs, the `double` data type is
+actually very fast on machines with hardware support for it.
+
+I think that you should switch to `float` (*single precision*) only if:
+
+- the hardware is limited to it, or
+- if machine code vectorization gets faster, or
+- conversion from/to buffer data to/from double precision is slower.
+
 ### Input selector
 
 The input selector simply chooses which channels to feed to the internal
