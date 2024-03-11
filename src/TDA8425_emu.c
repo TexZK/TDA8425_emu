@@ -212,8 +212,6 @@ void TDA8425_BiQuadModel_SetupPseudo(
 )
 {
     assert(model);
-    double fs = sample_rate;
-    double k = 0.5 / fs;
     assert(sample_rate > 0);
     assert(pseudo_c1 > 0);
     assert(pseudo_c2 > 0);
@@ -226,6 +224,10 @@ void TDA8425_BiQuadModel_SetupPseudo(
 
     double t1 = c1 * r1;
     double t2 = c2 * r2;
+
+    double fs = sample_rate;
+    double w = (1 / t2);  // pre-warp the highest
+    double k = (w ? (tan(w * 0.5 / fs) / w) : 0);
 
     double kk = k * k;
     double t1_t2 = t1 * t2;
@@ -262,9 +264,9 @@ void TDA8425_BiQuadModel_SetupBass(
     assert(bass_gain >= 0);
 
     double g = sqrt(bass_gain);
-    double fs = sample_rate;
-    double k = 0.5 / fs;
     double w = (2 * M_PI) * (double)TDA8425_Bass_Frequency;
+    double fs = sample_rate;
+    double k = (w ? (tan(w * 0.5 / fs) / w) : 0);
 
     double a0 = (k * w) + g;
     double a1 = (k * w) - g;
@@ -296,8 +298,8 @@ void TDA8425_BiQuadModel_SetupTreble(
 
     double g = sqrt(treble_gain);
     double fs = sample_rate;
-    double k = 0.5 / fs;
     double w = (2 * M_PI) * (double)TDA8425_Treble_Frequency;
+    double k = (w ? (tan(w * 0.5 / fs) / w) : 0);
 
     double a0 = ((k * w) * g) + 1;
     double a1 = ((k * w) * g) - 1;
@@ -328,9 +330,9 @@ void TDA8425_BiQuadModel_SetupTfilter(
     assert(bass_gain >= 0);
 
     double g = sqrt(bass_gain);
-    double fs = sample_rate;
-    double k = 0.5 / fs;
     double w = (2 * M_PI) * (double)TDA8425_Tfilter_Frequency;
+    double fs = sample_rate;
+    double k = (w ? (tan(w * 0.5 / fs) / w) : 0);
 
     double log10_g = log10(g);
     double ang = log10_g * 0.85;
@@ -425,8 +427,8 @@ void TDA8425_BiLinModel_SetupDCRemoval(
     assert(sample_rate > 0);
 
     double fs = sample_rate;
-    double k = 0.5 / fs;
     double w = (2 * M_PI) * (double)TDA8425_Lowest_Frequency;
+    double k = (w ? (tan(w * 0.5 / fs) / w) : 0);
 
     double a0 = (k * w) + 1;
     double a1 = (k * w) - 1;
@@ -456,8 +458,8 @@ void TDA8425_BiLinModel_SetupBass(
 
     double g = sqrt(bass_gain);
     double fs = sample_rate;
-    double k = 0.5 / fs;
     double w = (2 * M_PI) * (double)TDA8425_Bass_Frequency;
+    double k = (w ? (tan(w * 0.5 / fs) / w) : 0);
 
     double a0 = (k * w) + g;
     double a1 = (k * w) - g;
@@ -487,8 +489,8 @@ void TDA8425_BiLinModel_SetupTreble(
 
     double g = sqrt(treble_gain);
     double fs = sample_rate;
-    double k = 0.5 / fs;
     double w = (2 * M_PI) * (double)TDA8425_Treble_Frequency;
+    double k = (w ? (tan(w * 0.5 / fs) / w) : 0);
 
     double a0 = ((k * w) * g) + 1;
     double a1 = ((k * w) * g) - 1;
