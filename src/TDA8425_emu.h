@@ -43,11 +43,11 @@ extern "C" {
 #endif
 
 #ifndef TDA8425_USE_DC_REMOVAL
-#define TDA8425_USE_DC_REMOVAL 1
+#define TDA8425_USE_DC_REMOVAL 0
 #endif
 
 #ifndef TDA8425_USE_TFILTER
-#define TDA8425_USE_TFILTER 1
+#define TDA8425_USE_TFILTER 0
 #endif
 
 #ifndef TDA8425_USE_MODEL_CACHE
@@ -56,7 +56,7 @@ extern "C" {
 
 // ============================================================================
 
-#define TDA8425_VERSION "0.1.3"
+#define TDA8425_VERSION "0.1.4"
 
 char const* TDA8425_GetVersion(void);
 
