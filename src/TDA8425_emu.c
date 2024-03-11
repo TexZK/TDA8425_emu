@@ -212,10 +212,11 @@ void TDA8425_BiQuadModel_SetupPseudo(
 )
 {
     assert(model);
-    assert(sample_rate);
-
     double fs = sample_rate;
     double k = 0.5 / fs;
+    assert(sample_rate > 0);
+    assert(pseudo_c1 > 0);
+    assert(pseudo_c2 > 0);
 
     double c1 = pseudo_c1;
     double c2 = pseudo_c2;
@@ -257,7 +258,8 @@ void TDA8425_BiQuadModel_SetupBass(
 )
 {
     assert(model);
-    assert(sample_rate);
+    assert(sample_rate > 0);
+    assert(bass_gain >= 0);
 
     double g = sqrt(bass_gain);
     double fs = sample_rate;
@@ -289,7 +291,8 @@ void TDA8425_BiQuadModel_SetupTreble(
 )
 {
     assert(model);
-    assert(sample_rate);
+    assert(sample_rate > 0);
+    assert(treble_gain >= 0);
 
     double g = sqrt(treble_gain);
     double fs = sample_rate;
@@ -321,7 +324,8 @@ void TDA8425_BiQuadModel_SetupTfilter(
 )
 {
     assert(model);
-    assert(sample_rate);
+    assert(sample_rate > 0);
+    assert(bass_gain >= 0);
 
     double g = sqrt(bass_gain);
     double fs = sample_rate;
@@ -418,7 +422,7 @@ void TDA8425_BiLinModel_SetupDCRemoval(
 )
 {
     assert(model);
-    assert(sample_rate);
+    assert(sample_rate > 0);
 
     double fs = sample_rate;
     double k = 0.5 / fs;
@@ -447,7 +451,8 @@ void TDA8425_BiLinModel_SetupBass(
 )
 {
     assert(model);
-    assert(sample_rate);
+    assert(sample_rate > 0);
+    assert(bass_gain >= 0);
 
     double g = sqrt(bass_gain);
     double fs = sample_rate;
@@ -477,7 +482,8 @@ void TDA8425_BiLinModel_SetupTreble(
 )
 {
     assert(model);
-    assert(sample_rate);
+    assert(sample_rate > 0);
+    assert(treble_gain >= 0);
 
     double g = sqrt(treble_gain);
     double fs = sample_rate;
@@ -546,6 +552,7 @@ void TDA8425_DCRemoval_Process(
     TDA8425_BiLinState state[TDA8425_Stereo_Count]
 )
 {
+    assert(stereo);
     assert(model);
     assert(state);
 
@@ -608,6 +615,7 @@ void TDA8425_SpatialStereo_Process(
 
 void TDA8425_Chip_Ctor(TDA8425_Chip* self)
 {
+    (void)self;
     assert(self);
 }
 
@@ -615,6 +623,7 @@ void TDA8425_Chip_Ctor(TDA8425_Chip* self)
 
 void TDA8425_Chip_Dtor(TDA8425_Chip* self)
 {
+    (void)self;
     assert(self);
 }
 
@@ -629,7 +638,9 @@ void TDA8425_Chip_Setup(
 )
 {
     assert(self);
-    assert(sample_rate);
+    assert(sample_rate > 0);
+    assert(pseudo_c1 > 0);
+    assert(pseudo_c2 > 0);
 
     (void)tfilter_mode;
 #if TDA8425_USE_TFILTER
@@ -718,6 +729,7 @@ void TDA8425_Chip_Start(TDA8425_Chip* self)
 
 void TDA8425_Chip_Stop(TDA8425_Chip* self)
 {
+    (void)self;
     assert(self);
 }
 
@@ -821,7 +833,7 @@ void TDA8425_Chip_Process(
     assert(self);
     assert(data);
 
-    TDA8425_Float stereo[TDA8425_Stereo_Count];
+    TDA8425_Float stereo[TDA8425_Stereo_Count] = { 0, 0 };
 
     TDA8425_Chip_ProcessSelector(self, data, stereo);
 
