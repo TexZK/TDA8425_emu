@@ -1,7 +1,7 @@
 /*
 BSD 2-Clause License
 
-Copyright (c) 2020-2023, Andrea Zoppi
+Copyright (c) 2020-2024, Andrea Zoppi
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -642,19 +642,15 @@ void TDA8425_Chip_Setup(
     assert(pseudo_c1 > 0);
     assert(pseudo_c2 > 0);
 
-    (void)tfilter_mode;
-#if TDA8425_USE_TFILTER
     self->tfilter_mode_ = tfilter_mode;
-#endif  // TDA8425_USE_TFILTER
-
     self->sample_rate_ = sample_rate;
+    self->pseudo_c1_ = pseudo_c1;
+    self->pseudo_c2_ = pseudo_c2;
 
-#if TDA8425_USE_DC_REMOVAL
     TDA8425_BiLinModel_SetupDCRemoval(
         &self->dcremoval_model_,
         self->sample_rate_
     );
-#endif  // TDA8425_USE_DC_REMOVAL
 
     TDA8425_BiQuadModel_SetupPseudo(
         &self->pseudo_model_,
@@ -662,34 +658,6 @@ void TDA8425_Chip_Setup(
         pseudo_c1,
         pseudo_c2
     );
-
-#if TDA8425_USE_MODEL_CACHE
-    for (TDA8425_Register i = 0; i < TDA8425_Tone_Data_Count; ++i) {
-        TDA8425_Float bass_gain = TDA8425_RegisterToBass(i);
-
-        TDA8425_BiLinModel_SetupBass(
-            &self->bass_model_cache_[i],
-            self->sample_rate_,
-            bass_gain
-        );
-
-#if TDA8425_USE_TFILTER
-        TDA8425_BiQuadModel_SetupTfilter(
-            &self->tfilter_model_cache_[i],
-            self->sample_rate_,
-            bass_gain
-        );
-#endif  // TDA8425_USE_TFILTER
-
-        TDA8425_Float treble_gain = TDA8425_RegisterToTreble(i);
-
-        TDA8425_BiLinModel_SetupTreble(
-            &self->treble_model_cache_[i],
-            self->sample_rate_,
-            treble_gain
-        );
-    }
-#endif  // TDA8425_USE_MODEL_CACHE
 
     TDA8425_Chip_Write(self, (TDA8425_Address)TDA8425_Reg_BA, self->reg_ba_);
     TDA8425_Chip_Write(self, (TDA8425_Address)TDA8425_Reg_TR, self->reg_tr_);
@@ -719,9 +687,7 @@ void TDA8425_Chip_Start(TDA8425_Chip* self)
     for (int i = 0; i < TDA8425_Stereo_Count; ++i) {
         TDA8425_BiLinState_Clear(&self->bass_state_[i], 0);
         TDA8425_BiLinState_Clear(&self->treble_state_[i], 0);
-#if TDA8425_USE_TFILTER
         TDA8425_BiQuadState_Clear(&self->tfilter_state_[i], 0);
-#endif  // TDA8425_USE_TFILTER
     }
 }
 
@@ -837,13 +803,13 @@ void TDA8425_Chip_Process(
 
     TDA8425_Chip_ProcessSelector(self, data, stereo);
 
-#if TDA8425_USE_DC_REMOVAL
-    TDA8425_DCRemoval_Process(
-        stereo,
-        &self->dcremoval_model_,
-        self->dcremoval_state_
-    );
-#endif  // TDA8425_USE_DC_REMOVAL
+    if (self->dcremoval_mode_) {
+        TDA8425_DCRemoval_Process(
+            stereo,
+            &self->dcremoval_model_,
+            self->dcremoval_state_
+        );
+    }
 
     TDA8425_Chip_ProcessMode(self, stereo);
 
@@ -862,7 +828,6 @@ void TDA8425_Chip_Process(
             sample
         );
 
-#if TDA8425_USE_TFILTER
         if (self->tfilter_mode_ == TDA8425_Tfilter_Mode_Disabled) {
             data->outputs[channel] = sample;  // shortcut
         }
@@ -875,9 +840,6 @@ void TDA8425_Chip_Process(
 
             data->outputs[channel] = sample;
         }
-#else  // TDA8425_USE_TFILTER
-        data->outputs[channel] = sample;
-#endif  // TDA8425_USE_TFILTER
     }
 }
 
@@ -924,7 +886,7 @@ void TDA8425_Chip_Write(
 
     switch ((TDA8425_Reg)address)
     {
-    case TDA8425_Reg_VL:
+    case TDA8425_Reg_VL: {
         data |= (TDA8425_Register)~TDA8425_Volume_Data_Mask;
         self->reg_vl_ = data;
 
@@ -933,8 +895,9 @@ void TDA8425_Chip_Write(
         }
         self->volume_[TDA8425_Stereo_L] = TDA8425_RegisterToVolume(data);
         break;
+    }
 
-    case TDA8425_Reg_VR:
+    case TDA8425_Reg_VR: {
         data |= (TDA8425_Register)~TDA8425_Volume_Data_Mask;
         self->reg_vr_ = data;
 
@@ -943,18 +906,12 @@ void TDA8425_Chip_Write(
         }
         self->volume_[TDA8425_Stereo_R] = TDA8425_RegisterToVolume(data);
         break;
+    }
 
-    case TDA8425_Reg_BA:
+    case TDA8425_Reg_BA: {
         data |= (TDA8425_Register)~TDA8425_Tone_Data_Mask;
         self->reg_ba_ = data;
 
-#if TDA8425_USE_MODEL_CACHE
-        data &= (TDA8425_Register)TDA8425_Tone_Data_Mask;
-        self->bass_model_ = self->bass_model_cache_[data];
-#if TDA8425_USE_TFILTER
-        self->tfilter_model_ = self->tfilter_model_cache_[data];
-#endif  // TDA8425_USE_TFILTER
-#else  // TDA8425_USE_MODEL_CACHE
         TDA8425_Float bass_gain = TDA8425_RegisterToBass(data);
 
         TDA8425_BiLinModel_SetupBass(
@@ -963,7 +920,6 @@ void TDA8425_Chip_Write(
             bass_gain
         );
 
-#if TDA8425_USE_TFILTER
         if (self->tfilter_mode_) {
             TDA8425_BiQuadModel_SetupTfilter(
                 &self->tfilter_model_,
@@ -971,18 +927,13 @@ void TDA8425_Chip_Write(
                 bass_gain
             );
         }
-#endif  // TDA8425_USE_TFILTER
-#endif  // TDA8425_USE_MODEL_CACHE
         break;
+    }
 
-    case TDA8425_Reg_TR:
+    case TDA8425_Reg_TR: {
         data |= (TDA8425_Register)~TDA8425_Tone_Data_Mask;
         self->reg_tr_ = data;
 
-#if TDA8425_USE_MODEL_CACHE
-        data &= (TDA8425_Register)TDA8425_Tone_Data_Mask;
-        self->treble_model_ = self->treble_model_cache_[data];
-#else  // TDA8425_USE_MODEL_CACHE
         TDA8425_Float treble_gain = TDA8425_RegisterToTreble(data);
 
         TDA8425_BiLinModel_SetupTreble(
@@ -990,10 +941,34 @@ void TDA8425_Chip_Write(
             self->sample_rate_,
             treble_gain
         );
-#endif  // TDA8425_USE_MODEL_CACHE
         break;
+    }
 
-    case TDA8425_Reg_SF:
+#if TDA8425_USE_EXTENSIONS
+    case TDA8425_Reg_PP: {
+        data |= (TDA8425_Register)~TDA8425_Pseudo_Data_Mask;
+        self->reg_pp_ = data;
+
+        data &= (TDA8425_Register)TDA8425_Pseudo_Data_Mask;
+        TDA8425_Float pseudo_c1 = self->pseudo_c1_;
+        TDA8425_Float pseudo_c2 = self->pseudo_c2_;
+
+        if (data < TDA8425_Pseudo_Preset_Count) {
+            pseudo_c1 = TDA8425_Pseudo_C1_Table[data];
+            pseudo_c2 = TDA8425_Pseudo_C2_Table[data];
+        }
+
+        TDA8425_BiQuadModel_SetupPseudo(
+            &self->pseudo_model_,
+            self->sample_rate_,
+            pseudo_c1,
+            pseudo_c2
+        );
+        break;
+    }
+#endif  // TDA8425_USE_EXTENSIONS
+
+    case TDA8425_Reg_SF: {
         data |= (TDA8425_Register)~TDA8425_Switch_Data_Mask;
         self->reg_sf_ = data;
 
@@ -1007,9 +982,22 @@ void TDA8425_Chip_Write(
             & (TDA8425_Register)TDA8425_Mode_Mask
         );
 
+#if TDA8425_USE_EXTENSIONS
+        self->dcremoval_mode_ = (TDA8425_DCRemoval_Mode)((
+            (self->reg_sf_ >> TDA8425_Reg_SF_DC)
+            & (TDA8425_Register)TDA8425_DCRemoval_Mode_Enabled
+        ) ^ (TDA8425_Register)TDA8425_DCRemoval_Mode_Enabled);
+
+        self->tfilter_mode_ = (TDA8425_Tfilter_Mode)((
+            (self->reg_sf_ >> TDA8425_Reg_SF_TF)
+            & (TDA8425_Register)TDA8425_Tfilter_Mode_Enabled
+        ) ^ (TDA8425_Register)TDA8425_Tfilter_Mode_Enabled);
+#endif  // TDA8425_USE_EXTENSIONS
+
         TDA8425_Chip_Write(self, (TDA8425_Address)TDA8425_Reg_VL, self->reg_vl_);
         TDA8425_Chip_Write(self, (TDA8425_Address)TDA8425_Reg_VR, self->reg_vr_);
         break;
+    }
 
     default:
         break;

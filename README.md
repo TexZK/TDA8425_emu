@@ -101,20 +101,6 @@ The `TDA8425_Chip_Process()` method is always provided with two stereo sources.
 The library can optionally apply a high-pass filter at 10 Hz to the inputs, in
 order to emulate the DC removal shown in the frequency response charts.
 
-It is activated by the `TDA8425_USE_DC_REMOVAL` preprocessor symbol.
-
-### Filter model cache
-
-Although rare, it might be possible to continuously change bass and treble
-gains. This would recompute filter coefficients each time.
-
-In order to speed up processing, the `TDA8425_USE_MODEL_CACHE` preprocessor
-symbol lets precompute all the possible models at the specified sample rate,
-within `TDA8425_Chip_Setup()`.
-This way, changing gains means to simply switch to another precomputed model.
-
-This option is disabled by default.
-
 _______________________________________________________________________________
 
 ## Stereo modes
@@ -194,7 +180,6 @@ Furthermore, it looks like the *T-filter* has an additional second-order
 frequency response for bass control, which is factored into a dedicated biquad
 filter. You can refer to the
 [TDA8425_tfilter.py](tools/TDA8425_tfilter.py) Python script for reference.
-The *T-filter* is activated by the `TDA8425_USE_TFILTER` preprocessor symbol.
 
 ![Tone control "specified" frequency response](doc/tone_control_specified.png)
 

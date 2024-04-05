@@ -1,7 +1,7 @@
 /*
 BSD 2-Clause License
 
-Copyright (c) 2020-2023, Andrea Zoppi
+Copyright (c) 2020-2024, Andrea Zoppi
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -42,21 +42,13 @@ extern "C" {
 #define TDA8425_FLOAT double            //!< Floating point data type
 #endif
 
-#ifndef TDA8425_USE_DC_REMOVAL
-#define TDA8425_USE_DC_REMOVAL 0
-#endif
-
-#ifndef TDA8425_USE_TFILTER
-#define TDA8425_USE_TFILTER 0
-#endif
-
-#ifndef TDA8425_USE_MODEL_CACHE
-#define TDA8425_USE_MODEL_CACHE 0
+#ifndef TDA8425_USE_EXTENSIONS
+#define TDA8425_USE_EXTENSIONS 1
 #endif
 
 // ============================================================================
 
-#define TDA8425_VERSION "0.1.4"
+#define TDA8425_VERSION "0.2.0"
 
 char const* TDA8425_GetVersion(void);
 
@@ -73,6 +65,7 @@ typedef enum TDA8425_Reg {
     TDA8425_Reg_VR = 1,
     TDA8425_Reg_BA = 2,
     TDA8425_Reg_TR = 3,
+    TDA8425_Reg_PP = 7,
     TDA8425_Reg_SF = 8
 } TDA8425_Reg;
 
@@ -82,8 +75,9 @@ typedef enum TDA8425_RegOrder {
     TDA8425_RegOrder_VR    = 1,
     TDA8425_RegOrder_BA    = 2,
     TDA8425_RegOrder_TR    = 3,
-    TDA8425_RegOrder_SF    = 4,
-    TDA8425_RegOrder_Count = 5
+    TDA8425_RegOrder_PP    = 4,
+    TDA8425_RegOrder_SF    = 5,
+    TDA8425_RegOrder_Count = 6
 } TDA8425_RegOrder;
 
 //! Switch functions bit identifiers
@@ -94,8 +88,10 @@ typedef enum TDA8425_Reg_SF_Bit {
     TDA8425_Reg_SF_STL   = 3,
     TDA8425_Reg_SF_EFL   = 4,
     TDA8425_Reg_SF_MU    = 5,
+    TDA8425_Reg_SF_DC    = 6,
+    TDA8425_Reg_SF_TF    = 7,
 
-    TDA8425_Reg_SF_Count = 6
+    TDA8425_Reg_SF_Count = 8
 } TDA8425_Reg_SF_Bit;
 
 //! Stereo channels
@@ -160,6 +156,12 @@ typedef enum TDA8425_Tfilter_Mode {
     TDA8425_Tfilter_Mode_Enabled  = 1,
 } TDA8425_Tfilter_Mode;
 
+//! DC-removal mode
+typedef enum TDA8425_DCRemoval_Mode {
+    TDA8425_DCRemoval_Mode_Disabled = 0,
+    TDA8425_DCRemoval_Mode_Enabled  = 1,
+} TDA8425_DCRemoval_Mode;
+
 //! Datasheet specifications
 enum TDA8425_DatasheetSpecifications {
     TDA8425_Volume_Data_Bits  = 6,
@@ -182,6 +184,8 @@ enum TDA8425_DatasheetSpecifications {
 
     TDA8425_Pseudo_R1         = 15000,  // [ohm]
     TDA8425_Pseudo_R2         = 15000,  // [ohm]
+    TDA8425_Pseudo_Data_Bits  = 2,
+    TDA8425_Pseudo_Data_Mask  = (1 << TDA8425_Pseudo_Data_Bits) - 1,
 
     TDA8425_Spatial_Crosstalk = 52,  // [%]
 };
@@ -359,17 +363,19 @@ typedef struct TDA8425_ChipFloat
     TDA8425_Register reg_vr_;
     TDA8425_Register reg_ba_;
     TDA8425_Register reg_tr_;
+    TDA8425_Register reg_pp_;
     TDA8425_Register reg_sf_;
 
     TDA8425_Selector selector_;
     TDA8425_Mode mode_;
     TDA8425_Float sample_rate_;
+    TDA8425_Float pseudo_c1_;
+    TDA8425_Float pseudo_c2_;
     TDA8425_Float volume_[TDA8425_Stereo_Count];
 
-#if TDA8425_USE_DC_REMOVAL
+    TDA8425_DCRemoval_Mode dcremoval_mode_;
     TDA8425_BiLinModel dcremoval_model_;
     TDA8425_BiLinState dcremoval_state_[TDA8425_Stereo_Count];
-#endif  // TDA8425_USE_DC_REMOVAL
 
     TDA8425_BiQuadModel pseudo_model_;
     TDA8425_BiQuadState pseudo_state_;
@@ -380,19 +386,9 @@ typedef struct TDA8425_ChipFloat
     TDA8425_BiLinModel treble_model_;
     TDA8425_BiLinState treble_state_[TDA8425_Stereo_Count];
 
-#if TDA8425_USE_TFILTER
     TDA8425_Tfilter_Mode tfilter_mode_;
     TDA8425_BiQuadModel tfilter_model_;
     TDA8425_BiQuadState tfilter_state_[TDA8425_Stereo_Count];
-#endif  // TDA8425_USE_TFILTER
-
-#if TDA8425_USE_MODEL_CACHE
-    TDA8425_BiLinModel bass_model_cache_[TDA8425_Tone_Data_Count];
-#if TDA8425_USE_TFILTER
-    TDA8425_BiQuadModel tfilter_model_cache_[TDA8425_Tone_Data_Count];
-#endif  // TDA8425_USE_TFILTER
-    TDA8425_BiLinModel treble_model_cache_[TDA8425_Tone_Data_Count];
-#endif  // TDA8425_USE_MODEL_CACHE
 } TDA8425_Chip;
 
 typedef struct TDA8425_Chip_Process_Data

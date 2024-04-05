@@ -1,7 +1,7 @@
 /*
 BSD 2-Clause License
 
-Copyright (c) 2020-2023, Andrea Zoppi
+Copyright (c) 2020-2024, Andrea Zoppi
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -43,7 +43,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 static char const* USAGE = ("\
-TDA8425_pipe (c) 2020, Andrea Zoppi. All rights reserved.\n\
+TDA8425_pipe (c) 2020-2024, Andrea Zoppi. All rights reserved.\n\
 \n\
 This program emulates a TDA8425 Hi - fi stereo audio processor, made by\n\
 Philips Semiconductors.\n\
